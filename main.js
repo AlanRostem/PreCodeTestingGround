@@ -38,7 +38,13 @@ class TileEventHandler {
         return this.#self;
     }
 
-    
+    #handlerMap = new Map;
+
+    createTileTypeSituation(startId, endId, handlerFunc) {
+        this.#handlerMap.set(new this.constructor.#RangeTuple(startId, endId), handlerFunc);
+    }
+
+    // TODO: implement a way to retrieve handlers by id within a range
 }
 
 class TileMap {
