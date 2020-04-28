@@ -44,7 +44,7 @@ class TileEventHandler {
         this.#handlerMap.set(new this.constructor.#RangeTuple(startId, endId), handlerFunc);
     }
 
-    // TODO: implement a way to retrieve handlers by id within a range
+    // TODO: use an interval tree to create spawners for tile entities within a given range
 }
 
 class TileMap {
