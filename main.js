@@ -90,8 +90,8 @@ class IntervalTree {
             new this.constructor.#Interval(low, high), value);
     }
 
-    get(low, high) {
-        return this.#overlapSearch(this.#root, new this.constructor.#Interval(low, high));
+    get(pos) {
+        return this.#overlapSearch(this.#root, new this.constructor.#Interval(pos, pos));
     }
 }
 
