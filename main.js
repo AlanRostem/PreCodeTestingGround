@@ -33,30 +33,69 @@ class IntervalTree {
     };
 
     static #Node = class Node {
-        constructor(left, right, value) {
+        constructor(left, right, value, max, interval) {
             this.left = left;
             this.right = right;
             this.value = value;
+            this.interval = interval;
+            this.max = max;
         }
     };
 
-    constructor() {
+    static #checkOverlap = (i0, i1) => {
+        return i0.low <= i1.high && i1.low <= i0.high;
+    };
 
-    }
+    #root = null;
+
+    #newNode = (_interval, _value) => {
+        return new this.constructor.#Node(null, null, _value, _interval.high, _interval);
+    };
+
+    #insertUtil = (_node, _interval, _value) => {
+        if (_node == null) {
+            return this.#newNode(_interval, _value);
+        }
+
+        let low = this.#root.interval.low;
+
+        if (_interval.low < low) {
+            this.#root.left = this.#insertUtil(this.#root.left, _interval, _value);
+        } else {
+            this.#root.right = this.#insertUtil(this.#root.right, _interval, _value);
+        }
+
+        if (this.#root.max < _interval.high) {
+            this.#root.max = _interval.high;
+        }
+
+        return _node;
+    };
+
+    #overlapSearch = (_node, _interval) => {
+        if (_node === null) return null;
+        if (this.constructor.#checkOverlap(_node.interval, _interval)) {
+            return _node.value;
+        }
+
+        if (_node.left !== null && _node.left.max >= _interval.low) {
+            return this.#overlapSearch(_node.right, _interval);
+        }
+
+        return this.#overlapSearch(_node.right, _interval);
+    };
 
     insert(low, high, value) {
-        
+        this.#root = this.#insertUtil(this.#root,
+            new this.constructor.#Interval(low, high), value);
     }
 
+    get(low, high) {
+        return this.#overlapSearch(this.#root, new this.constructor.#Interval(low, high));
+    }
 }
 
 class TileEventHandler {
-    static #RangeTuple = class RangeTuple {
-        constructor(l, r) {
-            this.l = l;
-            this.r = r;
-        }
-    };
 
     static #self = new TileEventHandler();
 
@@ -67,10 +106,8 @@ class TileEventHandler {
     #handlerMap = new Map;
 
     createTileTypeSituation(startId, endId, handlerFunc) {
-        this.#handlerMap.set(new this.constructor.#RangeTuple(startId, endId), handlerFunc);
-    }
 
-    // TODO: use an interval tree to create spawners for tile entities within a given range
+    }
 }
 
 class TileMap {
@@ -230,7 +267,7 @@ function setup() {
                 e0.y + e0.h / 2 > e1.y - e1.h / 2
         },
         (e0, e1) => {
-            console.log(e0, e1);
+            //console.log(e0, e1);
         });
     entityManager = new EntityManager();
     for (let i = 0; i < 2; i++) {
