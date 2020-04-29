@@ -24,6 +24,32 @@ class TileArray {
     }
 }
 
+class IntervalTree {
+    static #Interval = class Interval {
+        constructor(low, high) {
+            this.low = low;
+            this.high = high;
+        }
+    };
+
+    static #Node = class Node {
+        constructor(left, right, value) {
+            this.left = left;
+            this.right = right;
+            this.value = value;
+        }
+    };
+
+    constructor() {
+
+    }
+
+    insert(low, high, value) {
+        
+    }
+
+}
+
 class TileEventHandler {
     static #RangeTuple = class RangeTuple {
         constructor(l, r) {
