@@ -79,7 +79,7 @@ class IntervalTree {
         }
 
         if (_node.left !== null && _node.left.max >= _interval.low) {
-            return this.#overlapSearch(_node.right, _interval);
+            return this.#overlapSearch(_node.left, _interval);
         }
 
         return this.#overlapSearch(_node.right, _interval);
