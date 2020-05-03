@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fuck.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/minkowski.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,8 +15,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -61,6 +64,9 @@
       <workItem from="1587920702926" duration="4176000" />
       <workItem from="1588109315485" duration="3042000" />
       <workItem from="1588112968270" duration="2314000" />
+      <workItem from="1588254965597" duration="598000" />
+      <workItem from="1588374576060" duration="1848000" />
+      <workItem from="1588518606682" duration="8818000" />
     </task>
     <servers />
   </component>
