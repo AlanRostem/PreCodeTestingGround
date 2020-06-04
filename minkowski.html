@@ -7,47 +7,6 @@
 </head>
 <body>
 <script>
-    class TileMap {
-        #arr = [
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        ];
-
-        #width = 10;
-        #height = 10;
-        #size = 32;
-
-        get(x, y) {
-            x %= this.#width;
-            y %= this.#height;
-            return this.#arr[x + y * this.#width];
-        }
-
-        getTileSize() {
-            return this.#size;
-        }
-
-        draw() {
-            for (let y = 0; y < this.#height; y++) {
-                for (let x = 0; x < this.#width; x++) {
-                    if (this.get(x, y) > 0) {
-                        fill(0);
-                        rectMode(CORNER);
-                        rect(x * this.#size, y * this.#size, this.#size, this.#size);
-                    }
-                }
-            }
-        }
-    }
-
     class AABB {
         center = createVector(0, 0);
         extents = createVector(0, 0);
@@ -84,40 +43,37 @@
                 aabb.center.y + aabb.extents.y > this.center.y - this.extents.y;
         }
 
-        minkowskiDifference(aabb) {
-            const topLeft = p5.Vector.sub(this.getMin(), aabb.getMax());
-            const size = p5.Vector.add(this.getSize(), aabb.getSize());
-            return new AABB(
-                p5.Vector.add(topLeft, p5.Vector.div(size, 2)),
-                p5.Vector.div(size, 2)
-            );
-        }
+        AABBCollision(aabb) {
+            if (this.overlaps(aabb)) {
+                let difference = p5.Vector.sub(aabb.center, this.center);
+                let totalExtents = p5.Vector.add(aabb.extents, this.extents);
 
-        closestMinkowskiPoint(point) {
-            const min = this.getMin();
-            const max = this.getMax();
+                totalExtents.x *= Math.sign(difference.x);
+                totalExtents.y *= Math.sign(difference.y);
 
-            let minDist = Math.abs(point.x - min.x);
-            let boundsPt = createVector(min.x, point.y);
+                let overlap = p5.Vector.sub(totalExtents, difference);
 
-            if (Math.abs(max.x - point.x) < minDist) {
-                minDist = Math.abs(max.x - point.x);
-                boundsPt = createVector(max.x, point.y);
+                stroke(255, 0, 0);
+                line(this.center.x,
+                    this.center.y,
+                    this.center.x + overlap.x,
+                    this.center.y + overlap.y);
+
+                if (Math.abs(difference.y) > Math.abs(difference.x)) {
+                    this.center.y -= overlap.y;
+                    if (difference.y > 0) {
+                        this.setOnGround(true);
+                    }
+                } else if (Math.abs(difference.y) < Math.abs(difference.x)) {
+                    this.center.x -= overlap.x;
+                } else {
+                    console.log("hmmm")
+                }
             }
-
-            if (Math.abs(max.y - point.y) < minDist) {
-                minDist = Math.abs(max.y - point.y);
-                boundsPt = createVector(point.x, max.y);
-            }
-
-            if (Math.abs(min.y - point.y) < minDist) {
-                boundsPt = createVector(point.x, min.y);
-            }
-
-            return boundsPt;
         }
 
         draw(r, g, b) {
+            stroke(0);
             fill(...arguments);
             rectMode(CENTER);
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
@@ -132,12 +88,11 @@
         update() {
             this.control();
             this.move();
-            this.tileCollision();
             this.wallCollision();
         }
 
         control() {
-            this.#vel.y += .8;
+            this.#vel.y += .3;
 
             if (keyIsDown(65)) {
                 if (keyIsDown(65) && !keyIsDown(68))
@@ -157,71 +112,6 @@
             this.#vel.x = 0;
         }
 
-        tileCollision() {
-            let proxy = 1;
-            let tileX = (this.extents.x * 2 / tileMap.getTileSize() | 0) + proxy;
-            let tileY = (this.extents.y * 2 / tileMap.getTileSize() | 0) + proxy;
-
-            for (let y = -proxy; y < tileY; y++) {
-                for (let x = -proxy; x < tileX; x++) {
-                    let xx = this.center.x / tileMap.getTileSize() | 0;
-                    let yy = this.center.y / tileMap.getTileSize() | 0;
-                    xx += x;
-                    yy += y;
-
-                    stroke(255);
-
-                    if (tileMap.get(xx, yy) === 0) {
-                        rectMode(CORNER);
-                        fill(0, 0);
-                        rect(xx * tileMap.getTileSize(), yy * tileMap.getTileSize(), tileMap.getTileSize(), tileMap.getTileSize());
-                        noStroke();
-                        continue;
-                    }
-
-                    let aabb = new AABB(
-                        createVector(
-                            xx * tileMap.getTileSize() + tileMap.getTileSize() / 2,
-                            yy * tileMap.getTileSize() + tileMap.getTileSize() / 2),
-                        createVector(
-                            tileMap.getTileSize() / 2,
-                            tileMap.getTileSize() / 2,
-                        ));
-
-                    let md = aabb.minkowskiDifference(this);
-                    if (md.min.x <= 0 &&
-                        md.max.x >= 0 &&
-                        md.min.y <= 0 &&
-                        md.max.y >= 0) {
-
-                        let penVec = md.closestMinkowskiPoint(createVector(0, 0));
-                        this.center.add(penVec);
-                        stroke(255, 0, 0);
-
-                        const deltaVec = p5.Vector.sub(this.center, aabb.center);
-                        if (deltaVec.y * deltaVec.y > deltaVec.x * deltaVec.x) {
-                            if (deltaVec.y > 0) {
-                                this.getVel().y *= -.5; // Top collision
-                            } else {
-                                this.getVel().y = 0; // Bottom collision
-                                this.setOnGround(true);
-                            }
-                        } else {
-                            if (deltaVec.x > 0) {
-                                this.getVel().x = 0; // Left collision
-                            } else {
-                                this.getVel().x = 0; // Right collision
-                            }
-                        }
-                    }
-
-                    fill(0, 0);
-                    rectMode(CORNER);
-                    rect(xx * tileMap.getTileSize(), yy * tileMap.getTileSize(), tileMap.getTileSize(), tileMap.getTileSize());
-                    noStroke();
-                }
-            }
-        }
 
         wallCollision() {
 
@@ -245,13 +135,14 @@
 
         jump() {
             if (!this.#jumping) {
-                this.#vel.y = -10;
+                this.#vel.y = -6;
                 this.#jumping = true;
             }
         }
 
         setOnGround(value) {
             this.#jumping = !value;
+            this.#vel.y = 0;
         }
 
         getVel() {
@@ -259,29 +150,50 @@
         }
     }
 
-    let tileMap;
-    let player;
-    let obstacle;
 
+    let player;
+    let obstacles;
+    let map = [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    ];
     let speed;
 
     function setup() {
         createCanvas(320, 320);
-        tileMap = new TileMap();
-        player = new Player(createVector(32, 32), createVector(16, 16));
-        obstacle = new AABB(createVector(width / 2, height - 12), createVector(12, 12));
+        player = new Player(createVector(32, 32), createVector(12, 12));
+        obstacles = [];
+
+        for (let x = 0; x < 10; x++)
+            for (let y = 0; y < 10; y++) {
+                let size = 16;
+                if (map[x + y * 10] > 0) obstacles.push(new AABB(
+                    createVector(x * size * 2 + size, y * size * 2+ size),
+                    createVector(size, size)))
+            }
 
         speed = 2;
     }
 
     function draw() {
         background(150);
-        smooth();
-        tileMap.draw();
 
+        player.draw(0, 0, 0);
 
         player.update();
-        player.draw(0, 255, 0);
+        for (let obstacle of obstacles) {
+            player.AABBCollision(obstacle);
+            obstacle.draw(0, 255, 0);
+        }
+        //obstacle.AABBCollision(player);
     }
 </script>
 </body>
