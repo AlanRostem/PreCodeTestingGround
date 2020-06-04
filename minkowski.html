@@ -55,10 +55,8 @@
         }
 
         overlaps(aabb) {
-            return aabb.center.x - aabb.extents.x < this.center.x + this.extents.x &&
-                aabb.center.x + aabb.extents.x > this.center.x - this.extents.x &&
-                aabb.center.y - aabb.extents.y < this.center.y + this.extents.y &&
-                aabb.center.y + aabb.extents.y > this.center.y - this.extents.y;
+            return (Math.abs(this.center.x - aabb.center.x) * 2 < (this.extents.x + aabb.extents.x) * 2) &&
+                (Math.abs(this.center.y - aabb.center.y) * 2 < (this.extents.y + aabb.extents.y) * 2);
         }
 
         intersectSegment(pos, delta, padding) {
@@ -161,7 +159,7 @@
         }
 
         AABBCollision(aabb) {
-
+            console.log(this.overlaps(aabb))
         }
 
         draw(r, g, b) {
@@ -280,16 +278,18 @@
         createCanvas(320, 320);
         player = new Player(createVector(32, 32), createVector(16, 16));
         obstacles = [];
+        speed = 2;
 
         for (let x = 0; x < 10; x++)
             for (let y = 0; y < 10; y++) {
                 let size = 16;
-                if (map[x + y * 10] > 0) obstacles.push(new AABB(
-                    createVector(x * size * 2 + size, y * size * 2 + size),
-                    createVector(size, size)))
+                if (map[x + y * 10] > 0) {
+                    obstacles.push(new AABB(
+                        createVector(x * size * 2 + size, y * size * 2 + size),
+                        createVector(size, size)));
+                }
             }
 
-        speed = 2;
     }
 
     function draw() {
