@@ -7,6 +7,24 @@
 </head>
 <body>
 <script>
+    class Hit {
+        constructor(aabb) {
+            this.collider = aabb;
+            this.pos = createVector();
+            this.delta = createVector();
+            this.normal = createVector();
+            this.time = 0;
+        };
+    }
+
+    class Sweep {
+        constructor() {
+            this.hit = null;
+            this.pos = createVector();
+            this.time = 1;
+        }
+    }
+
     class AABB {
         center = createVector(0, 0);
         extents = createVector(0, 0);
@@ -43,33 +61,107 @@
                 aabb.center.y + aabb.extents.y > this.center.y - this.extents.y;
         }
 
-        AABBCollision(aabb) {
-            if (this.overlaps(aabb)) {
-                let difference = p5.Vector.sub(aabb.center, this.center);
-                let totalExtents = p5.Vector.add(aabb.extents, this.extents);
+        intersectSegment(pos, delta, padding) {
+            const scale = createVector(1 / delta.x, 1 / delta.y);
+            const sign = createVector(Math.sign(scale.x), Math.sign(scale.y));
+            const nearTime = createVector(
+                (this.center.x - sign.x * (this.extents.x + padding.x) - pos.x) * scale.x,
+                (this.center.y - sign.y * (this.extents.y + padding.y) - pos.y) * scale.y,
+            );
+            const farTime = createVector(
+                (this.center.x + sign.x * (this.extents.x + padding.x) - pos.x) * scale.x,
+                (this.center.y + sign.y * (this.extents.y + padding.y) - pos.y) * scale.y
+            );
 
-                totalExtents.x *= Math.sign(difference.x);
-                totalExtents.y *= Math.sign(difference.y);
-
-                let overlap = p5.Vector.sub(totalExtents, difference);
-
-                stroke(255, 0, 0);
-                line(this.center.x,
-                    this.center.y,
-                    this.center.x + overlap.x,
-                    this.center.y + overlap.y);
-
-                if (Math.abs(difference.y) > Math.abs(difference.x)) {
-                    this.center.y -= overlap.y;
-                    if (difference.y > 0) {
-                        this.setOnGround(true);
-                    }
-                } else if (Math.abs(difference.y) < Math.abs(difference.x)) {
-                    this.center.x -= overlap.x;
-                } else {
-                    console.log("hmmm")
-                }
+            if (nearTime.x > farTime.y || nearTime.y > farTime.x) {
+                return null;
             }
+
+            const nearTimeComputed = nearTime.x > nearTime.y ? nearTime.x : nearTime.y;
+            const farTimeComputed = farTime.x < farTime.y ? farTime.x : farTime.y;
+
+            if (nearTimeComputed >= 1 || farTimeComputed <= 0) {
+                return null;
+            }
+
+            const hit = new Hit(this);
+            hit.time = clamp(nearTimeComputed, 0, 1);
+            if (nearTime.x > nearTime.y) {
+                hit.normal.x = -sign.x;
+                hit.normal.y = 0;
+            } else {
+                hit.normal.x = 0;
+                hit.normal.y = -sign.y;
+            }
+
+            hit.delta.x = (1.0 - hit.time) * -delta.x;
+            hit.delta.y = (1.0 - hit.time) * -delta.y;
+            hit.pos.x = pos.x + delta.x * hit.time;
+            hit.pos.y = pos.y + delta.y * hit.time;
+
+            return hit;
+        }
+
+        intersectAABB(aabb) {
+            const delta = p5.Vector.sub(aabb.center, this.center);
+            let line = p5.Vector.add(aabb.extents, this.extents);
+            let abs = createVector(Math.abs(delta.x), Math.abs(delta.y));
+            line.sub(abs);
+
+            if (line.x <= 0 || line.y <= 0) return null;
+
+            const hit = new Hit(this);
+
+            if (line.x < line.y) {
+                const sx = Math.sign(delta.x);
+                hit.delta.x = line.x * sx;
+                hit.normal.x = sx;
+                hit.pos.x = this.center.x + (this.extents.x * sx);
+                hit.pos.y = aabb.center.y;
+            } else {
+                const sy = Math.sign(delta.y);
+                hit.delta.y = line.y * sy;
+                hit.normal.y = sy;
+                hit.pos.x = aabb.center.x;
+                hit.pos.y = this.center.y + (this.extents.y * sy);
+            }
+
+            return hit;
+        }
+
+        sweepAABB(aabb, delta) {
+            const sweep = new Sweep();
+            if (delta.x === 0 && delta.y === 0) {
+                sweep.pos.x = aabb.center.x;
+                sweep.pos.y = aabb.center.y;
+                sweep.hit = this.intersectAABB(aabb);
+                sweep.time = sweep.hit ? (sweep.hit.time = 0) : 1;
+                return sweep;
+            }
+
+            sweep.hit = this.intersectSegment(aabb.center, delta, aabb.extents);
+            if (sweep.hit) {
+                sweep.time = clamp(sweep.hit.time - Math.EPSILON, 0, 1);
+                sweep.pos.x = aabb.center.x + delta.x * sweep.time;
+                sweep.pos.y = aabb.center.y + delta.y * sweep.time;
+                const direction = delta.clone();
+                direction.normalize();
+                sweep.hit.pos.x = clamp(
+                    sweep.hit.pos.x + direction.x * aabb.extents.x,
+                    this.center.x - this.extents.x, this.center.x + this.extents.x);
+                sweep.hit.pos.y = clamp(
+                    sweep.hit.pos.y + direction.y * aabb.extents.y,
+                    this.center.y - this.extents.y, this.center.y + this.extents.y);
+            } else {
+                sweep.pos.x = aabb.center.x + delta.x;
+                sweep.pos.y = aabb.center.y + delta.y;
+                sweep.time = 1;
+            }
+            return sweep;
+        }
+
+        AABBCollision(aabb) {
+
         }
 
         draw(r, g, b) {
@@ -77,6 +169,14 @@
             fill(...arguments);
             rectMode(CENTER);
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
+        }
+
+        onBottomCollision() {
+
+        }
+
+        onTopCollision() {
+
         }
     }
 
@@ -89,6 +189,15 @@
             this.control();
             this.move();
             this.wallCollision();
+        }
+
+        onBottomCollision() {
+
+            this.setOnGround(true);
+        }
+
+        onTopCollision() {
+            this.#vel.y = 0;
         }
 
         control() {
@@ -161,7 +270,7 @@
         0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
     ];
@@ -169,14 +278,14 @@
 
     function setup() {
         createCanvas(320, 320);
-        player = new Player(createVector(32, 32), createVector(12, 12));
+        player = new Player(createVector(32, 32), createVector(16, 16));
         obstacles = [];
 
         for (let x = 0; x < 10; x++)
             for (let y = 0; y < 10; y++) {
                 let size = 16;
                 if (map[x + y * 10] > 0) obstacles.push(new AABB(
-                    createVector(x * size * 2 + size, y * size * 2+ size),
+                    createVector(x * size * 2 + size, y * size * 2 + size),
                     createVector(size, size)))
             }
 
@@ -184,17 +293,53 @@
     }
 
     function draw() {
+        frameRate(60);
+
         background(150);
 
-        player.draw(0, 0, 0);
 
         player.update();
-        for (let obstacle of obstacles) {
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let obstacle = obstacles[i];
             player.AABBCollision(obstacle);
             obstacle.draw(0, 255, 0);
         }
+        player.draw(0, 0, 0);
+
         //obstacle.AABBCollision(player);
     }
+
+    /**
+     *  if (this.overlaps(aabb)) {
+                let difference = p5.Vector.sub(aabb.center, this.center);
+                let totalExtents = p5.Vector.add(aabb.extents, this.extents);
+
+                totalExtents.x *= Math.sign(difference.x);
+                totalExtents.y *= Math.sign(difference.y);
+
+                let overlap = p5.Vector.sub(totalExtents, difference);
+
+
+                stroke(255, 0, 0);
+                line(this.center.x,
+                    this.center.y,
+                    this.center.x + difference.x,
+                    this.center.y + difference.y);
+
+                if (Math.abs(difference.y) > Math.abs(difference.x)) {
+                    this.center.y -= overlap.y;
+                    if (difference.y > 0) {
+                        this.onBottomCollision();
+                    } else if (difference.y < 0) {
+                        this.onTopCollision();
+                    }
+                } else if (Math.abs(difference.y) < Math.abs(difference.x)) {
+                    this.center.x -= overlap.x;
+                } else {
+                    this.center.sub(overlap);
+                }
+            }
+     */
 </script>
 </body>
 </html>
