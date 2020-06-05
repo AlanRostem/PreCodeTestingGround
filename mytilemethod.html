@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Kill me</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+    <script src="priority-queue.js"></script>
 </head>
 <body>
 <script>
@@ -96,10 +97,10 @@
 
     class Player extends AABB {
         jumping = true;
+        collisionStack = [];
 
         constructor() {
-            super(createVector(64, 64), createVector(30, 30));
-            this.oldCenter = this.center.copy();
+            super(createVector(64, 64), createVector(32, 32));
             this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
             this.speed = 4;
@@ -127,7 +128,7 @@
             }
         }
 
-        proximityTileScanMethod() {
+        tileScan() {
             let centralTile = Tile.toTile(this.center);
             for (let x = -1; x <= 1; x++) {
                 for (let y = -1; y <= 1; y++) {
@@ -141,80 +142,12 @@
                         !this.overlaps(tile)
                     ) continue;
 
-                    if (this.center.y - this.extents.y < tile.center.y + tile.extents.y &&
-                        this.oldCenter.y - this.extents.y >= tile.center.y + tile.extents.y) {
-                        this.center.y = tile.center.y + tile.extents.y + this.extents.y;
-                        this.topColl();
-                    }
-
-                    if (this.center.y + this.extents.y > tile.center.y - tile.extents.y &&
-                        this.oldCenter.y + this.extents.y <= tile.center.y - tile.extents.y) {
-                        this.center.y = tile.center.y - tile.extents.y - this.extents.y;
-                        this.bottomColl();
-                    }
-
-                    if (this.center.x - this.extents.x < tile.center.x + tile.extents.x &&
-                        this.oldCenter.x - this.extents.x >= tile.center.x + tile.extents.x) {
-                        this.center.x = tile.center.x + tile.extents.x + this.extents.x;
-                        this.leftColl();
-                    }
-
-                    if (this.center.x + this.extents.y > tile.center.x - tile.extents.x &&
-                        this.oldCenter.x + this.extents.y <= tile.center.x - tile.extents.x) {
-                        this.center.x = tile.center.x - tile.extents.x - this.extents.x;
-                        this.rightColl();
-                    }
-
-
+                    this.reserveCollisionTo(tile);
                 }
             }
         }
 
-        cornerCheckMethod() {
-            let topLeft = Tile.toTile({
-                x: this.center.x - this.extents.x,
-                y: this.center.y - this.extents.y,
-            });
-
-            if (tileMap.getTileId(topLeft.x, topLeft.y) > 0) {
-
-            }
-
-            let topRight = Tile.toTile({
-                x: this.center.x + this.extents.x,
-                y: this.center.y - this.extents.y,
-            });
-
-            if (tileMap.getTileId(topRight.x, topRight.y) > 0) {
-
-            }
-
-            let bottomLeft = Tile.toTile({
-                x: this.center.x - this.extents.x,
-                y: this.center.y + this.extents.y,
-            });
-
-            if (tileMap.getTileId(bottomLeft.x, bottomLeft.y) > 0) {
-
-            }
-
-            let bottomRight = Tile.toTile({
-                x: this.center.x + this.extents.x,
-                y: this.center.y + this.extents.y,
-            });
-
-            if (tileMap.getTileId(bottomRight.x, bottomRight.y) > 0) {
-
-            }
-
-        }
-
-        tileCollision() {
-            this.proximityTileScanMethod();
-            // this.cornerCheckMethod();
-        }
-
-        walking() {
+        controls() {
             if (keyIsDown(LEFT_ARROW)) {
                 this.vel.x = -this.speed;
             }
@@ -223,22 +156,29 @@
                 this.vel.x = this.speed;
             }
 
-            if (keyIsDown(32)) {
+            if (keyIsDown(UP_ARROW)) {
                 if (!this.jumping) {
-                    this.vel.y = -this.speed * 3;
+                    this.vel.y = -12;
                     this.jumping = true;
                 }
             }
+        }
 
-            this.oldCenter = this.center.copy();
+        moving() {
+
+
             this.acc.y = 0.5;
             this.vel.add(this.acc);
             this.center.add(this.vel);
         }
 
         update() {
-            this.walking();
-            this.tileCollision();
+            this.controls();
+            this.moving();
+
+            this.tileScan();
+            this.resolveCollisions();
+
             this.screenSpaceCollision();
         }
 
@@ -265,10 +205,123 @@
             fill(0, 50, 200);
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
         }
+
+        reserveCollisionTo(aabb) {
+            let difference = p5.Vector.sub(aabb.center, this.center);
+            let object = {aabb: aabb, priority: difference.magSq()};
+            this.collisionStack.push(object);
+        }
+
+        resolveCollisions() {
+            this.collisionStack.sort((a, b) => {
+                return a.priority - b.priority;
+            });
+
+            let maxIter = 5;
+            while (this.collisionStack.length !== 0) {
+                let aabb = this.collisionStack.shift().aabb;
+                let iterations = 0;
+                while (this.overlaps(aabb) && iterations < maxIter) {
+                    let distance = p5.Vector.sub(aabb.center, this.center);
+                    let minDistance = p5.Vector.add(aabb.extents, this.extents);
+
+                    let intersection = createVector(
+                        distance.x > 0 ? minDistance.x - distance.x : -minDistance.x - distance.x,
+                        distance.y > 0 ? minDistance.y - distance.y : -minDistance.y - distance.y
+                    );
+
+                    if (intersection.x !== 0 && intersection.y !== 0) {
+                        if (Math.abs(intersection.x) < Math.abs(intersection.y)) {
+                            if (Math.sign(intersection.x) > 0) {
+                                this.center.x = aabb.center.x - aabb.extents.x - this.extents.x;
+                                this.rightColl();
+                            } else {
+                                this.center.x = aabb.center.x + aabb.extents.x + this.extents.x;
+                                this.leftColl();
+                            }
+                        } else if (Math.abs(intersection.x) > Math.abs(intersection.y)) {
+                            if (Math.sign(intersection.y) > 0) {
+                                this.center.y = aabb.center.y - aabb.extents.y - this.extents.y;
+                                this.bottomColl();
+                            } else {
+                                this.center.y = aabb.center.y + aabb.extents.y + this.extents.y;
+                                this.topColl();
+                            }
+                        } else {
+                            this.center.sub(intersection);
+                        }
+                    }
+                    iterations++;
+                }
+
+                /*
+                let aabb = this.collisionStack.shift().aabb;
+                let iterations = 0;
+                let maxIter = 5;
+                while (this.overlaps(aabb) && iterations < maxIter) {
+                    let difference = p5.Vector.sub(aabb.center, this.center);
+                    let totalExtents = p5.Vector.add(aabb.extents, this.extents);
+
+                    totalExtents.x *= Math.sign(difference.x);
+                    totalExtents.y *= Math.sign(difference.y);
+
+                    let overlap = p5.Vector.sub(totalExtents, difference);
+
+                    text(difference.x + "," + difference.y, this.center.x, this.center.y - this.extents.y * 2);
+                    stroke(255 - 100 * i, 255 - 100 * i, 255 - 100 * i);
+                    line(this.center.x,
+                        this.center.y,
+                        this.center.x + difference.x,
+                        this.center.y + difference.y);
+
+                    if (Math.abs(difference.y) > Math.abs(difference.x)) {
+                        if (difference.y > 0) {
+                            this.bottomColl();
+                        } else if (difference.y < 0) {
+                            this.topColl();
+                        }
+                        this.center.y -= overlap.y;
+                    } else if (Math.abs(difference.y) < Math.abs(difference.x)) {
+                        if (difference.x > 0) {
+                            this.rightColl();
+                        } else if (difference.x < 0) {
+                            this.leftColl();
+                        }
+                        this.center.x -= overlap.x;
+                    } else {
+                        this.center.sub(overlap);
+                        console.log("Equilibrium in axes!");
+                    }
+                    i++;
+                    iterations++;
+                }
+                 */
+            }
+        }
+    }
+
+    class Fucker extends Player {
+        controls() {
+            if (keyIsDown(65)) {
+                this.vel.x = -this.speed;
+            }
+
+            if (keyIsDown(68)) {
+                this.vel.x = this.speed;
+            }
+
+            if (keyIsDown(32)) {
+                if (!this.jumping) {
+                    this.vel.y = -12;
+                    this.jumping = true;
+                }
+            }
+        }
     }
 
     let tileMap;
     let player;
+    let fucker;
 
     function setup() {
         createCanvas(640, 640);
@@ -286,15 +339,25 @@
         ]);
 
         player = new Player();
+        fucker = new Fucker();
     }
 
     function draw() {
         background(200);
+        //frameRate(10);
 
         tileMap.draw();
 
         player.update();
         player.draw();
+
+        fucker.update();
+        fucker.draw();
+
+        if (fucker.overlaps(player)) {
+            fucker.reserveCollisionTo(player);
+            player.reserveCollisionTo(fucker);
+        }
     }
 
 </script>
