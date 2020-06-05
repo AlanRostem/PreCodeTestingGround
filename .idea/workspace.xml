@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gamle-maaten.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PreCodeTestingGround.iml" beforeDir="false" afterPath="$PROJECT_DIR$/PreCodeTestingGround.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mytilemethod.html" beforeDir="false" afterPath="$PROJECT_DIR$/mytilemethod.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,8 +14,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -72,7 +70,7 @@
       <workItem from="1591205952163" duration="597000" />
       <workItem from="1591305294232" duration="7604000" />
       <workItem from="1591358795548" duration="8147000" />
-      <workItem from="1591381725595" duration="11101000" />
+      <workItem from="1591381725595" duration="13512000" />
     </task>
     <servers />
   </component>
