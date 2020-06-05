@@ -15,6 +15,11 @@
             this.center = center;
             this.extents = extents;
         }
+
+        overlaps(aabb) {
+            return (Math.abs(this.center.x - aabb.center.x) * 2 < (this.extents.x + aabb.extents.x) * 2) &&
+                (Math.abs(this.center.y - aabb.center.y) * 2 < (this.extents.y + aabb.extents.y) * 2);
+        }
     }
 
     class Tile {
@@ -91,14 +96,16 @@
 
     class Player extends AABB {
         jumping = true;
+
         constructor() {
             super(createVector(64, 64), createVector(16, 16));
+            this.oldCenter = this.center.copy();
             this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
             this.speed = 4;
         }
 
-        wallCollision() {
+        screenSpaceCollision() {
             if (this.center.x + this.extents.x > width) {
                 this.center.x = width - this.extents.x;
                 this.rightColl();
@@ -120,8 +127,105 @@
             }
         }
 
-        tileCollision() {
+        proximityTileScanMethod() {
+            let centralTile = Tile.toTile(this.center);
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new AABB(new Tile(xx, yy).toVec(), createVector(Tile.SIZE / 2, Tile.SIZE / 2));
+                    if (
+                        xx < 0 || xx >= tileMap.width ||
+                        yy < 0 || yy >= tileMap.height ||
+                        tileMap.getTileId(xx, yy) === 0 ||
+                        !this.overlaps(tile)
+                    ) continue;
 
+
+                    if (this.center.x + this.extents.y > tile.center.x - tile.extents.x &&
+                        this.oldCenter.x + this.extents.y <= tile.center.x - tile.extents.x) {
+                        this.center.x = tile.center.x - tile.extents.x - this.extents.x;
+                        this.rightColl();
+                    }
+
+                    if (this.center.x - this.extents.x < tile.center.x + tile.extents.x &&
+                        this.oldCenter.x - this.extents.x >= tile.center.x + tile.extents.x) {
+                        this.center.x = tile.center.x + tile.extents.x + this.extents.x;
+                        this.leftColl();
+                    }
+                }
+            }
+
+            centralTile = Tile.toTile(this.center);
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new AABB(new Tile(xx, yy).toVec(), createVector(Tile.SIZE / 2, Tile.SIZE / 2));
+                    if (
+                        xx < 0 || xx >= tileMap.width ||
+                        yy < 0 || yy >= tileMap.height ||
+                        tileMap.getTileId(xx, yy) === 0 ||
+                        !this.overlaps(tile)
+                    ) continue;
+
+                    if (this.center.y + this.extents.y > tile.center.y - tile.extents.y &&
+                        this.oldCenter.y + this.extents.y <= tile.center.y - tile.extents.y) {
+                        this.center.y = tile.center.y - tile.extents.y - this.extents.y - 0.01;
+                        this.bottomColl();
+                    }
+
+                    if (this.center.y - this.extents.y < tile.center.y + tile.extents.y &&
+                        this.oldCenter.y - this.extents.y >= tile.center.y + tile.extents.y) {
+                        this.center.y = tile.center.y + tile.extents.y + this.extents.y + 0.01;
+                        this.topColl();
+                    }
+                }
+            }
+        }
+
+        cornerCheckMethod() {
+            let topLeft = Tile.toTile({
+                x: this.center.x - this.extents.x,
+                y: this.center.y - this.extents.y,
+            });
+
+            if (tileMap.getTileId(topLeft.x, topLeft.y) > 0) {
+
+            }
+
+            let topRight = Tile.toTile({
+                x: this.center.x + this.extents.x,
+                y: this.center.y - this.extents.y,
+            });
+
+            if (tileMap.getTileId(topRight.x, topRight.y) > 0) {
+
+            }
+
+            let bottomLeft = Tile.toTile({
+                x: this.center.x - this.extents.x,
+                y: this.center.y + this.extents.y,
+            });
+
+            if (tileMap.getTileId(bottomLeft.x, bottomLeft.y) > 0) {
+
+            }
+
+            let bottomRight = Tile.toTile({
+                x: this.center.x + this.extents.x,
+                y: this.center.y + this.extents.y,
+            });
+
+            if (tileMap.getTileId(bottomRight.x, bottomRight.y) > 0) {
+
+            }
+
+        }
+
+        tileCollision() {
+            this.proximityTileScanMethod();
+            // this.cornerCheckMethod();
         }
 
         walking() {
@@ -140,6 +244,7 @@
                 }
             }
 
+            this.oldCenter = this.center.copy();
             this.acc.y = 0.5;
             this.vel.add(this.acc);
             this.center.add(this.vel);
@@ -148,7 +253,7 @@
         update() {
             this.walking();
             this.tileCollision();
-            this.wallCollision();
+            this.screenSpaceCollision();
         }
 
         topColl() {
@@ -165,7 +270,7 @@
         }
 
         rightColl() {
-            this.vel.y = 0;
+            this.vel.x = 0;
         }
 
         draw() {
