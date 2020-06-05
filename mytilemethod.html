@@ -98,7 +98,7 @@
         jumping = true;
 
         constructor() {
-            super(createVector(64, 64), createVector(16, 16));
+            super(createVector(64, 64), createVector(30, 30));
             this.oldCenter = this.center.copy();
             this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
@@ -143,25 +143,25 @@
 
                     if (this.center.y - this.extents.y < tile.center.y + tile.extents.y &&
                         this.oldCenter.y - this.extents.y >= tile.center.y + tile.extents.y) {
-                        this.center.y = tile.center.y + tile.extents.y + this.extents.y + 0.01;
+                        this.center.y = tile.center.y + tile.extents.y + this.extents.y;
                         this.topColl();
                     }
 
                     if (this.center.y + this.extents.y > tile.center.y - tile.extents.y &&
                         this.oldCenter.y + this.extents.y <= tile.center.y - tile.extents.y) {
-                        this.center.y = tile.center.y - tile.extents.y - this.extents.y - 0.01;
+                        this.center.y = tile.center.y - tile.extents.y - this.extents.y;
                         this.bottomColl();
                     }
 
                     if (this.center.x - this.extents.x < tile.center.x + tile.extents.x &&
                         this.oldCenter.x - this.extents.x >= tile.center.x + tile.extents.x) {
-                        this.center.x = tile.center.x + tile.extents.x + this.extents.x + 0.01;
+                        this.center.x = tile.center.x + tile.extents.x + this.extents.x;
                         this.leftColl();
                     }
 
                     if (this.center.x + this.extents.y > tile.center.x - tile.extents.x &&
                         this.oldCenter.x + this.extents.y <= tile.center.x - tile.extents.x) {
-                        this.center.x = tile.center.x - tile.extents.x - this.extents.x  - 0.01;
+                        this.center.x = tile.center.x - tile.extents.x - this.extents.x;
                         this.rightColl();
                     }
 
