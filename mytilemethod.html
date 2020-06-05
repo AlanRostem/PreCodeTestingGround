@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kill me</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+</head>
+<body>
+<script>
+    class AABB {
+        center = createVector();
+        extents = createVector();
+
+        constructor(center, extents) {
+            this.center = center;
+            this.extents = extents;
+        }
+    }
+
+    class Tile {
+        static SIZE = 16;
+        x = 0;
+        y = 0;
+        id = -1;
+
+        constructor(x, y, id = -1) {
+            this.x = x;
+            this.y = y;
+            this.id = id;
+        }
+
+        toVec() {
+            return createVector(
+                this.x * Tile.SIZE + Tile.SIZE / 2,
+                this.y * Tile.SIZE + Tile.SIZE / 2,
+            );
+        }
+
+        static toTile(vec) {
+            return new Tile(
+                vec.x / this.SIZE | 0,
+                vec.y / this.SIZE | 0,
+            );
+        }
+    }
+
+    class TileMap {
+        width = 0;
+        height = 0;
+        array = [];
+
+        constructor(width, height, array) {
+            this.width = width;
+            this.height = height;
+            this.array = array;
+        }
+
+        getTileFromVec(vec) {
+            vec = Tile.toTile(vec);
+            return this.array[vec.x + vec.y * this.width];
+        }
+
+        getTile(x, y) {
+            return this.array[x + y * this.width];
+        }
+
+        draw() {
+            for (let x = 0; x < this.width; x++)
+                for (let y = 0; y < this.height; y++) {
+
+                }
+        }
+    }
+
+    function setup() {
+
+    }
+
+    function draw() {
+
+    }
+
+</script>
+</body>
+</html>
