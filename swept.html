@@ -4,27 +4,339 @@
     <meta charset="UTF-8">
     <title>Swept</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
-    <script src="priority-queue.js"></script>
 </head>
 <body>
 <script>
-    class AABB {
-        center = createVector();
-        extents = createVector();
 
+    class AABB {
         constructor(center, extents) {
             this.center = center;
             this.extents = extents;
+            this.color = color(255 - random(100), random(100), 0)
         }
 
         overlaps(aabb) {
             return (Math.abs(this.center.x - aabb.center.x) * 2 < (this.extents.x + aabb.extents.x) * 2) &&
                 (Math.abs(this.center.y - aabb.center.y) * 2 < (this.extents.y + aabb.extents.y) * 2);
         }
+
+        get top() {
+            return this.center.y - this.extents.y;
+        }
+
+        set top(y) {
+            this.center.y = y + this.extents.y;
+        }
+
+        get bottom() {
+            return this.center.y + this.extents.y;
+        }
+
+        set bottom(y) {
+            this.center.y = y - this.extents.y;
+        }
+
+        get left() {
+            return this.center.x - this.extents.x;
+        }
+
+        set left(x) {
+            this.center.x = x + this.extents.x;
+        }
+
+        get right() {
+            return this.center.x + this.extents.x;
+        }
+
+        set right(x) {
+            this.center.x = x - this.extents.x;
+        }
+
+
+        draw() {
+            fill(this.color);
+            rectMode(CENTER);
+            noStroke();
+            rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
+        }
+    }
+
+    class MovingRect extends AABB {
+        constructor(center, extents) {
+            super(center, extents);
+            this.oldCenter = this.center.copy();
+            this.vel = createVector(0, 0);
+            this.acc = createVector(0, 0);
+        }
+
+        updateMotion() {
+            this.oldCenter = this.center.copy();
+            this.vel.add(this.acc);
+            //this.center.add(this.vel);
+        }
+
+        getOld() {
+            return new AABB(this.oldCenter, this.extents);
+        }
+
+        getDisplacement() {
+            return p5.Vector.sub(this.oldCenter, this.center);
+        }
+    }
+
+    class CollidingRect extends MovingRect {
+        constructor(center, extents, grav = 0.5) {
+            super(center, extents);
+            this.collisionQueue = [];
+            const proxy = 1;
+            let tileX = Math.round(this.extents.x * 2 / Tile.SIZE + proxy);
+            let tileY = Math.round(this.extents.y * 2 / Tile.SIZE + proxy);
+            if (tileX === 1) tileX++;
+            if (tileY === 1) tileY++;
+            this.tileArea = createVector(tileX, tileY);
+            this.acc.y = grav;
+        }
+
+        onTopCollision() {
+
+        }
+
+        onBottomCollision() {
+
+        }
+
+        onLeftCollision() {
+
+        }
+
+        onRightCollision() {
+
+        }
+
+        constrainWithinScreen() {
+            if (this.top < 0) {
+                this.top = 0;
+                this.onTopCollision();
+            }
+
+            if (this.bottom > height) {
+                this.bottom = height;
+                this.onBottomCollision();
+            }
+
+            if (this.left < 0) {
+                this.left = 0;
+                this.onLeftCollision();
+            }
+
+            if (this.right > width) {
+                this.right = width;
+                this.onRightCollision();
+            }
+        }
+
+        scanTiles() {
+            let centralTile = Tile.toTile(this.center);
+            for (let x = -this.tileArea.x + 1; x < this.tileArea.x; x++) {
+                for (let y = -this.tileArea.y + 1; y < this.tileArea.y; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new Tile(xx, yy).toAABB();
+                    if (
+                        xx < 0 || xx >= tileMap.width ||
+                        yy < 0 || yy >= tileMap.height ||
+                        tileMap.getTileId(xx, yy) === 0
+                        // || !this.overlaps(tile)
+                    ) continue;
+
+                    this.reserveStaticCollisionTo(tile, p5.Vector.sub(this.center, tile.center).magSq());
+
+                    noFill();
+                    stroke(255, 0, 0);
+                    rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
+                    noStroke();
+                }
+            }
+
+        }
+
+        scanEntities() {
+            for (let entity of entities) {
+                if (entity !== this) {
+                    this.reserveMotionCollisionTo(entity, p5.Vector.sub(this.center, entity.center).magSq());
+                    if (this.overlaps(entity)) {
+                    }
+                }
+            }
+        }
+
+        // Remember to add in the pointer to the AABB that has motion properties
+        reserveMotionCollisionTo(aabb, distance) {
+            this.collisionQueue.push({aabb: aabb, priority: distance, isInMotion: true});
+        }
+
+        reserveStaticCollisionTo(aabb, distance) {
+            this.collisionQueue.push({aabb: aabb, priority: distance, isInMotion: false});
+        }
+
+        sweptTimeCalculation(aabb) {
+            let deltaEntry = createVector(0, 0);
+            let deltaExit = createVector(0, 0);
+
+            let velocity = this.vel;
+
+            if (velocity.x > 0) {
+                deltaEntry.x = aabb.left - this.right;
+                deltaExit.x = aabb.right - this.left;
+            } else {
+                deltaEntry.x = aabb.right - this.left;
+                deltaExit.x = aabb.left - this.right;
+            }
+
+            if (velocity.y > 0) {
+                deltaEntry.y = aabb.top - this.bottom;
+                deltaExit.y = aabb.bottom - this.top;
+            } else {
+                deltaEntry.y = aabb.bottom - this.top;
+                deltaExit.y = aabb.top - this.bottom;
+            }
+
+            let entryTime = createVector(0, 0);
+            let exitTime = createVector(0, 0);
+
+            if (velocity.x === 0) {
+                entryTime.x = Infinity;
+                exitTime.x = Infinity;
+            } else {
+                entryTime.x = deltaEntry.x / velocity.x;
+                exitTime.x = deltaExit.x / velocity.x;
+            }
+
+            if (velocity.y === 0) {
+                entryTime.y = Infinity;
+                exitTime.y = Infinity;
+            } else {
+                entryTime.y = deltaEntry.y / velocity.y;
+                exitTime.y = deltaExit.y / velocity.y;
+            }
+
+            let maxEntryTime = Math.max(entryTime.x, entryTime.y);
+            let minExitTime = Math.min(exitTime.x, exitTime.y);
+
+            if (maxEntryTime > minExitTime || (entryTime.x < 0 && entryTime.y < 0) || entryTime.x > 1 || entryTime.y > 1) {
+                return 1;
+            }
+
+            return maxEntryTime;
+        }
+
+        resolveStaticCollision(aabb) {
+
+        }
+
+        resolveMotionCollision(aabb) {
+            let collisionTime = this.sweptTimeCalculation(aabb);
+            let result = p5.Vector.mult(this.vel, collisionTime);
+            console.log(result);
+            this.center.add(result);
+            noFill();
+            stroke(255, 0, 0);
+            rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
+            noStroke();
+        }
+
+        resolveCollisions() {
+            this.collisionQueue.sort((a, b) => {
+                return a.priority - b.priority;
+            });
+
+            while (this.collisionQueue.length !== 0) {
+                let element = this.collisionQueue.shift();
+                // if (!this.overlaps(element.aabb)) continue;
+                if (element.isInMotion) {
+                    this.resolveMotionCollision(element.aabb);
+                    if (this.getDisplacement().magSq() > element.aabb.getDisplacement().magSq()) {
+                    }
+                } else {
+                    this.resolveStaticCollision(element.aabb);
+                }
+            }
+        }
+
+        detectCollisions() {
+            this.scanTiles();
+            this.scanEntities();
+        }
+
+        update() {
+            this.updateMotion();
+
+            this.detectCollisions();
+            this.resolveCollisions();
+
+            this.constrainWithinScreen();
+        }
+    }
+
+    class FallingRect extends CollidingRect {
+        onLeftCollision() {
+            //this.vel.x = 0;
+        }
+
+        onRightCollision() {
+            //this.vel.x = 0;
+        }
+
+        onTopCollision() {
+            this.vel.y = 0;
+        }
+
+        onBottomCollision() {
+            this.vel = createVector(0, 0);
+        }
+
+        update() {
+            super.update();
+        }
+    }
+
+    class Player extends FallingRect {
+        constructor(center) {
+            super(center, createVector(16, 16));
+            this.jumping = true;
+            this.speed = 4;
+        }
+
+        controls() {
+            if (keyIsDown(LEFT_ARROW)) {
+                this.vel.x = -this.speed;
+            }
+
+            if (keyIsDown(RIGHT_ARROW)) {
+                this.vel.x = this.speed;
+            }
+
+            if (keyIsDown(UP_ARROW)) {
+                if (!this.jumping) {
+                    this.vel.y = -12;
+                    this.jumping = true;
+                }
+            }
+        }
+
+        onBottomCollision() {
+            super.onBottomCollision();
+            this.jumping = false;
+        }
+
+        update() {
+            this.controls();
+            super.update();
+        }
     }
 
     class Tile {
-        static SIZE = 64;
+        static SIZE = 32;
         x = 0;
         y = 0;
         id = -1;
@@ -40,6 +352,13 @@
                 this.x * Tile.SIZE + Tile.SIZE / 2,
                 this.y * Tile.SIZE + Tile.SIZE / 2,
             );
+        }
+
+        toAABB() {
+            return new AABB(createVector(
+                this.x * Tile.SIZE + Tile.SIZE / 2,
+                this.y * Tile.SIZE + Tile.SIZE / 2,
+            ), createVector(Tile.SIZE / 2, Tile.SIZE / 2));
         }
 
         static toTile(vec) {
@@ -76,7 +395,7 @@
                     let id = this.getTileId(x, y);
                     if (id > 0) {
                         let pos = new Tile(x, y).toVec();
-                        fill(255 - id * 50, id * 50, 255 - id * 50);
+                        fill(id * 50, 100, 255 - id * 50);
                         rectMode(CENTER);
                         stroke(255);
                         strokeWeight(1);
@@ -95,242 +414,65 @@
         }
     });
 
-    class Player extends AABB {
-        jumping = true;
-
-        constructor() {
-            super(createVector(64, 64), createVector(32, 32));
-            this.vel = createVector(0, 0);
-            this.acc = createVector(0, 0);
-            this.speed = 4;
-        }
-
-        screenSpaceCollision() {
-            if (this.center.x + this.extents.x > width) {
-                this.center.x = width - this.extents.x;
-                this.rightColl();
-            }
-
-            if (this.center.x - this.extents.x < 0) {
-                this.center.x = this.extents.x;
-                this.leftColl();
-            }
-
-            if (this.center.y + this.extents.y > height) {
-                this.center.y = height - this.extents.y;
-                this.bottomColl();
-            }
-
-            if (this.center.y - this.extents.y < 0) {
-                this.center.y = this.extents.y;
-                this.topColl();
-            }
-        }
-
-        tileScan() {
-            let centralTile = Tile.toTile(this.center);
-            for (let x = -1; x <= 1; x++) {
-                for (let y = -1; y <= 1; y++) {
-                    let xx = centralTile.x + x;
-                    let yy = centralTile.y + y;
-                    let tile = new AABB(new Tile(xx, yy).toVec(), createVector(Tile.SIZE / 2, Tile.SIZE / 2));
-                    if (
-                        xx < 0 || xx >= tileMap.width ||
-                        yy < 0 || yy >= tileMap.height ||
-                        tileMap.getTileId(xx, yy) === 0
-                        // || !this.overlaps(tile)
-                    ) continue;
-
-                    let normal = createVector(0, 0);
-                    let time = this.getSweptAABBTime(tile, normal);
-                    this.center.sub(p5.Vector.mult(this.vel, time));
-                    console.log(time);
-                }
-            }
-        }
-
-        controls() {
-            if (keyIsDown(LEFT_ARROW)) {
-                this.vel.x = -this.speed;
-            }
-
-            if (keyIsDown(RIGHT_ARROW)) {
-                this.vel.x = this.speed;
-            }
-
-            if (keyIsDown(UP_ARROW)) {
-                if (!this.jumping) {
-                    this.vel.y = -12;
-                    this.jumping = true;
-                }
-            }
-        }
-
-        moving() {
-            // this.acc.y = 0.5;
-            this.vel.add(this.acc);
-            this.center.add(this.vel);
-        }
-
-        update() {
-            this.controls();
-            this.moving();
-
-            this.tileScan();
-
-            this.screenSpaceCollision();
-        }
-
-        topColl() {
-            this.vel.y *= -.5;
-        }
-
-        bottomColl() {
-            this.vel = createVector(0, 0);
-            this.jumping = false;
-        }
-
-        leftColl() {
-            this.vel.x = 0;
-        }
-
-        rightColl() {
-            this.vel.x = 0;
-        }
-
-        draw() {
-            rectMode(CENTER);
-            noStroke();
-            fill(0, 50, 200);
-            rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
-        }
-
-        getSweptAABBTime(aabb, normalOut) {
-            let invEntry = createVector(0, 0);
-            let invExit = createVector(0, 0);
-
-            if (this.vel.x > 0) {
-                invEntry.x = (aabb.center.x - aabb.extents.x) - (this.center.x + this.extents.x);
-                invExit.x = (aabb.center.x + aabb.extents.x) - (this.center.x - this.extents.x);
-            } else //if (this.vel.x < 0)
-            {
-                invEntry.x = (aabb.center.x + aabb.extents.x) - (this.center.x - this.extents.x);
-                invExit.x = (aabb.center.x - aabb.extents.x) - (this.center.x + this.extents.x);
-            }
-
-            if (this.vel.y > 0) {
-                invEntry.y = (aabb.center.y - aabb.extents.y) - (this.center.y + this.extents.y);
-                invExit.y = (aabb.center.y + aabb.extents.y) - (this.center.y - this.extents.y);
-            } else //if (this.vel.y < 0)
-            {
-                invEntry.y = (aabb.center.y + aabb.extents.y) - (this.center.y - this.extents.y);
-                invExit.y = (aabb.center.y - aabb.extents.y) - (this.center.y + this.extents.y);
-            }
-
-            // Find collision time
-
-            let entry = createVector(0, 0);
-            let exit = createVector(0, 0);
-
-            if (this.vel.x === 0) {
-                entry.x = exit.x = Infinity;
-            } else {
-                entry.x = invEntry.x / this.vel.x;
-                exit.x = invExit.x / this.vel.x;
-            }
-
-            if (this.vel.y === 0) {
-                entry.y = exit.y = Infinity;
-            } else {
-                entry.y = invEntry.y / this.vel.y;
-                exit.y = invExit.y / this.vel.y;
-            }
-
-            let entryTime = Math.max(entry.x, entry.y);
-            let exitTime = Math.min(exit.x, exit.y);
-
-            if (entryTime > exitTime || entry.x < 0 && entry.y < 0 || entry.x > 1 || entry.y > 1) {
-                normalOut.x = normalOut.y = 0;
-                return 1;
-            }
-
-            if (entry.x > entry.y) {
-                if (invEntry.x < 0) {
-                    normalOut.x = 1;
-                    normalOut.y = 0;
-                } else {
-                    normalOut.x = -1;
-                    normalOut.y = 0;
-                }
-            } else {
-                if (invEntry.y < 0) {
-                    normalOut.x = 0;
-                    normalOut.y = 1;
-                } else {
-                    normalOut.x = 0;
-                    normalOut.y = -1;
-                }
-            }
-            return entryTime;
-        }
-    }
-
-    document.body.style.margin = 0;
-
-    function mouseMoved() {
-        player.vel = createVector(mouseX - player.center.x, mouseY  - player.center.y).normalize().mult(1);
-    }
-
-    class Fucker extends Player {
-        controls() {
-            if (keyIsDown(65)) {
-                this.vel.x = -this.speed;
-            }
-
-            if (keyIsDown(68)) {
-                this.vel.x = this.speed;
-            }
-
-            if (keyIsDown(32)) {
-                if (!this.jumping) {
-                    this.vel.y = -12;
-                    this.jumping = true;
-                }
-            }
-        }
-    }
-
+    let entities;
     let tileMap;
-    let player;
-    let fucker;
 
-    function setup() {
-        createCanvas(640, 640);
-        tileMap = new TileMap(10, 10, [
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 3, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-            6, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-            6, 0, 0, 0, 0, 1, 0, 0, 4, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-            2, 3, 4, 5, 0, 0, 0, 0, 4, 3,
-            0, 0, 0, 0, 0, 0, 1, 1, 3, 0,
-            1, 1, 1, 1, 2, 1, 1, 1, 1, 1,
-        ]);
-
-        player = new Player();
-        fucker = new Fucker();
+    function mousePressed() {
+        if (mouseButton === "right") {
+            entities.push(new FallingRect(
+                createVector(mouseX, mouseY),
+                createVector(random(32, 16), random(32, 16)),
+                -0.5
+            ));
+            return false;
+        } else {
+            entities.push(new FallingRect(
+                createVector(mouseX, mouseY),
+                createVector(random(32, 16), random(32, 16)),
+            ));
+        }
     }
 
     function draw() {
-        background(200);
-        //frameRate(10);
+        background(0, 10, 120);
 
         tileMap.draw();
+        for (let entity of entities) {
+            entity.draw();
+            entity.update();
+        }
+    }
 
-        player.update();
-        player.draw();
+    function setup() {
+        document.body.style.margin = 0;
+        addEventListener("contextmenu", e => e.preventDefault());
+        createCanvas(640, 640);
+        entities = [
+            new Player(createVector(160, 160)),
+        ];
+
+        tileMap = new TileMap(20, 20, [
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+            10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+            8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+            6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2,
+            4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+        ]);
     }
 
 </script>

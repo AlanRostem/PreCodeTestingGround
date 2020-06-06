@@ -237,9 +237,7 @@
                 let element = this.collisionQueue.shift();
                 if (!this.overlaps(element.aabb)) continue;
                 if (element.isInMotion) {
-                    if (this.getDisplacement().magSq() > element.aabb.getDisplacement().magSq()) {
-                        this.resolveMotionCollision(element.aabb);
-                    }
+                    this.resolveMotionCollision(element.aabb);
                 } else {
                     this.resolveStaticCollision(element.aabb);
                 }
