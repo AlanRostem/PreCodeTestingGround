@@ -190,23 +190,23 @@
             let old = this.getOld();
             if (this.top < aabb.bottom
                 && old.top >= aabb.bottom) {
+                aabb.vel.y = -this.getDisplacement().y;
                 this.top = aabb.bottom;
-                aabb.vel.y = this.vel.y;
                 this.onTopCollision();
             } else if (this.bottom > aabb.top
                 && old.bottom <= aabb.top) {
+                aabb.vel.y = -this.getDisplacement().y;
                 this.bottom = aabb.top;
-                aabb.vel.y = this.vel.y;
                 this.onBottomCollision();
             } else if (this.left < aabb.right
                 && old.left >= aabb.right) {
+                aabb.vel.x = -this.getDisplacement().x;
                 this.left = aabb.right;
-                aabb.vel.x = this.vel.x;
                 this.onLeftCollision();
             } else if (this.right > aabb.left
                 && old.right <= aabb.left) {
+                aabb.vel.x = -this.getDisplacement().x;
                 this.right = aabb.left;
-                aabb.vel.x = this.vel.x;
                 this.onRightCollision();
             }
         }
