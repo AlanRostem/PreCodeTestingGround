@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Kill me</title>
+    <title>Swept</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
     <script src="priority-queue.js"></script>
 </head>
@@ -97,11 +97,9 @@
 
     class Player extends AABB {
         jumping = true;
-        collisionStack = [];
 
         constructor() {
             super(createVector(64, 64), createVector(32, 32));
-            this.oldCenter = this.center.copy();
             this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
             this.speed = 4;
@@ -129,8 +127,7 @@
             }
         }
 
-        proximityTileScanMethod() {
-            let collisionStack = [];
+        tileScan() {
             let centralTile = Tile.toTile(this.center);
             for (let x = -1; x <= 1; x++) {
                 for (let y = -1; y <= 1; y++) {
@@ -141,49 +138,18 @@
                         xx < 0 || xx >= tileMap.width ||
                         yy < 0 || yy >= tileMap.height ||
                         tileMap.getTileId(xx, yy) === 0
-                        || !this.overlaps(tile)
+                        // || !this.overlaps(tile)
                     ) continue;
 
-                    collisionStack.push({aabb: tile, mag: p5.Vector.sub(tile.center, this.center).magSq()});
-                }
-            }
-
-            collisionStack.sort((a, b) => {
-                return a.mag - b.mag;
-            });
-
-            while (collisionStack.length !== 0) {
-                let aabb = collisionStack.shift().aabb;
-                if (!this.overlaps(aabb)) continue;
-                if (this.center.y - this.extents.y < aabb.center.y + aabb.extents.y
-                    && this.oldCenter.y - this.extents.y >= aabb.center.y + aabb.extents.y) {
-                    this.center.y = aabb.center.y + aabb.extents.y + this.extents.y;
-                    this.topColl();
-                }
-                if (this.center.y + this.extents.y > aabb.center.y - aabb.extents.y
-                    && this.oldCenter.y + this.extents.y <= aabb.center.y - aabb.extents.y) {
-                    this.center.y = aabb.center.y - aabb.extents.y - this.extents.y;
-                    this.bottomColl();
-                }
-                if (this.center.x - this.extents.x < aabb.center.x + aabb.extents.x
-                    && this.oldCenter.x - this.extents.x >= aabb.center.x + aabb.extents.x) {
-                    this.center.x = aabb.center.x + aabb.extents.x + this.extents.x;
-                    this.leftColl();
-                }
-                if (this.center.x + this.extents.y > aabb.center.x - aabb.extents.x
-                    && this.oldCenter.x + this.extents.y <= aabb.center.x - aabb.extents.x) {
-                    this.center.x = aabb.center.x - aabb.extents.x - this.extents.x;
-                    this.rightColl();
+                    let normal = createVector(0, 0);
+                    let time = this.getSweptAABBTime(tile, normal);
+                    this.center.sub(p5.Vector.mult(this.vel, time));
+                    console.log(time);
                 }
             }
         }
 
-
-        tileCollision() {
-            this.proximityTileScanMethod();
-        }
-
-        walking() {
+        controls() {
             if (keyIsDown(LEFT_ARROW)) {
                 this.vel.x = -this.speed;
             }
@@ -201,9 +167,7 @@
         }
 
         moving() {
-
-
-            this.acc.y = 0.5;
+            // this.acc.y = 0.5;
             this.vel.add(this.acc);
             this.center.add(this.vel);
         }
@@ -213,7 +177,6 @@
             this.moving();
 
             this.tileScan();
-            this.resolveCollisions();
 
             this.screenSpaceCollision();
         }
@@ -242,98 +205,80 @@
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
         }
 
-        reserveCollisionTo(aabb) {
-            let difference = p5.Vector.sub(aabb.center, this.center);
-            let object = {aabb: aabb, priority: difference.magSq()};
-            this.collisionStack.push(object);
-        }
+        getSweptAABBTime(aabb, normalOut) {
+            let invEntry = createVector(0, 0);
+            let invExit = createVector(0, 0);
 
-        resolveCollisions() {
-            this.collisionStack.sort((a, b) => {
-                return a.priority - b.priority;
-            });
-
-            let maxIter = 5;
-            while (this.collisionStack.length !== 0) {
-                let aabb = this.collisionStack.shift().aabb;
-                let iterations = 0;
-                while (this.overlaps(aabb) && iterations < maxIter) {
-                    let distance = p5.Vector.sub(aabb.center, this.center);
-                    let minDistance = p5.Vector.add(aabb.extents, this.extents);
-
-                    let intersection = createVector(
-                        distance.x > 0 ? minDistance.x - distance.x : -minDistance.x - distance.x,
-                        distance.y > 0 ? minDistance.y - distance.y : -minDistance.y - distance.y
-                    );
-
-                    if (intersection.x !== 0 && intersection.y !== 0) {
-                        if (Math.abs(intersection.x) < Math.abs(intersection.y)) {
-                            if (Math.sign(intersection.x) > 0) {
-                                this.center.x = aabb.center.x - aabb.extents.x - this.extents.x;
-                                this.rightColl();
-                            } else {
-                                this.center.x = aabb.center.x + aabb.extents.x + this.extents.x;
-                                this.leftColl();
-                            }
-                        } else if (Math.abs(intersection.x) > Math.abs(intersection.y)) {
-                            if (Math.sign(intersection.y) > 0) {
-                                this.center.y = aabb.center.y - aabb.extents.y - this.extents.y;
-                                this.bottomColl();
-                            } else {
-                                this.center.y = aabb.center.y + aabb.extents.y + this.extents.y;
-                                this.topColl();
-                            }
-                        } else {
-                            this.center.sub(intersection);
-                        }
-                    }
-                    iterations++;
-                }
-
-                /*
-                let aabb = this.collisionStack.shift().aabb;
-                let iterations = 0;
-                let maxIter = 5;
-                while (this.overlaps(aabb) && iterations < maxIter) {
-                    let difference = p5.Vector.sub(aabb.center, this.center);
-                    let totalExtents = p5.Vector.add(aabb.extents, this.extents);
-
-                    totalExtents.x *= Math.sign(difference.x);
-                    totalExtents.y *= Math.sign(difference.y);
-
-                    let overlap = p5.Vector.sub(totalExtents, difference);
-
-                    text(difference.x + "," + difference.y, this.center.x, this.center.y - this.extents.y * 2);
-                    stroke(255 - 100 * i, 255 - 100 * i, 255 - 100 * i);
-                    line(this.center.x,
-                        this.center.y,
-                        this.center.x + difference.x,
-                        this.center.y + difference.y);
-
-                    if (Math.abs(difference.y) > Math.abs(difference.x)) {
-                        if (difference.y > 0) {
-                            this.bottomColl();
-                        } else if (difference.y < 0) {
-                            this.topColl();
-                        }
-                        this.center.y -= overlap.y;
-                    } else if (Math.abs(difference.y) < Math.abs(difference.x)) {
-                        if (difference.x > 0) {
-                            this.rightColl();
-                        } else if (difference.x < 0) {
-                            this.leftColl();
-                        }
-                        this.center.x -= overlap.x;
-                    } else {
-                        this.center.sub(overlap);
-                        console.log("Equilibrium in axes!");
-                    }
-                    i++;
-                    iterations++;
-                }
-                 */
+            if (this.vel.x > 0) {
+                invEntry.x = (aabb.center.x - aabb.extents.x) - (this.center.x + this.extents.x);
+                invExit.x = (aabb.center.x + aabb.extents.x) - (this.center.x - this.extents.x);
+            } else //if (this.vel.x < 0)
+            {
+                invEntry.x = (aabb.center.x + aabb.extents.x) - (this.center.x - this.extents.x);
+                invExit.x = (aabb.center.x - aabb.extents.x) - (this.center.x + this.extents.x);
             }
+
+            if (this.vel.y > 0) {
+                invEntry.y = (aabb.center.y - aabb.extents.y) - (this.center.y + this.extents.y);
+                invExit.y = (aabb.center.y + aabb.extents.y) - (this.center.y - this.extents.y);
+            } else //if (this.vel.y < 0)
+            {
+                invEntry.y = (aabb.center.y + aabb.extents.y) - (this.center.y - this.extents.y);
+                invExit.y = (aabb.center.y - aabb.extents.y) - (this.center.y + this.extents.y);
+            }
+
+            // Find collision time
+
+            let entry = createVector(0, 0);
+            let exit = createVector(0, 0);
+
+            if (this.vel.x === 0) {
+                entry.x = exit.x = Infinity;
+            } else {
+                entry.x = invEntry.x / this.vel.x;
+                exit.x = invExit.x / this.vel.x;
+            }
+
+            if (this.vel.y === 0) {
+                entry.y = exit.y = Infinity;
+            } else {
+                entry.y = invEntry.y / this.vel.y;
+                exit.y = invExit.y / this.vel.y;
+            }
+
+            let entryTime = Math.max(entry.x, entry.y);
+            let exitTime = Math.min(exit.x, exit.y);
+
+            if (entryTime > exitTime || entry.x < 0 && entry.y < 0 || entry.x > 1 || entry.y > 1) {
+                normalOut.x = normalOut.y = 0;
+                return 1;
+            }
+
+            if (entry.x > entry.y) {
+                if (invEntry.x < 0) {
+                    normalOut.x = 1;
+                    normalOut.y = 0;
+                } else {
+                    normalOut.x = -1;
+                    normalOut.y = 0;
+                }
+            } else {
+                if (invEntry.y < 0) {
+                    normalOut.x = 0;
+                    normalOut.y = 1;
+                } else {
+                    normalOut.x = 0;
+                    normalOut.y = -1;
+                }
+            }
+            return entryTime;
         }
+    }
+
+    document.body.style.margin = 0;
+
+    function mouseMoved() {
+        player.vel = createVector(mouseX - player.center.x, mouseY  - player.center.y).normalize().mult(1);
     }
 
     class Fucker extends Player {
@@ -386,14 +331,6 @@
 
         player.update();
         player.draw();
-
-        fucker.update();
-        fucker.draw();
-
-        if (fucker.overlaps(player)) {
-            fucker.reserveCollisionTo(player);
-            player.reserveCollisionTo(fucker);
-        }
     }
 
 </script>
