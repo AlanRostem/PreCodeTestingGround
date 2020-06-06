@@ -12,7 +12,7 @@
         constructor(center, extents) {
             this.center = center;
             this.extents = extents;
-            this.color = color(random(255), random(255), random(255))
+            this.color = color(255 - random(100), random(100), 0)
         }
 
         overlaps(aabb) {
@@ -56,6 +56,7 @@
         draw() {
             fill(this.color);
             rectMode(CENTER);
+            noStroke();
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
         }
     }
@@ -84,7 +85,7 @@
     }
 
     class CollidingRect extends MovingRect {
-        constructor(center, extents) {
+        constructor(center, extents, grav = 0.5) {
             super(center, extents);
             this.collisionQueue = [];
             const proxy = 1;
@@ -93,6 +94,7 @@
             if (tileX === 1) tileX++;
             if (tileY === 1) tileY++;
             this.tileArea = createVector(tileX, tileY);
+            this.acc.y = grav;
         }
 
         onTopCollision() {
@@ -148,6 +150,7 @@
                     ) continue;
 
                     this.reserveStaticCollisionTo(tile, p5.Vector.sub(this.center, tile.center).magSq());
+
                     noFill();
                     stroke(255, 0, 0);
                     rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
@@ -260,15 +263,15 @@
 
     class FallingRect extends CollidingRect {
         onLeftCollision() {
-            this.vel.x = 0;
+            //this.vel.x = 0;
         }
 
         onRightCollision() {
-            this.vel.x = 0;
+            //this.vel.x = 0;
         }
 
         onTopCollision() {
-            this.vel.y *= -.5;
+            this.vel.y = 0;
         }
 
         onBottomCollision() {
@@ -276,7 +279,6 @@
         }
 
         update() {
-            this.acc.y = 0.5;
             super.update();
         }
     }
@@ -376,7 +378,7 @@
                     let id = this.getTileId(x, y);
                     if (id > 0) {
                         let pos = new Tile(x, y).toVec();
-                        fill(135, id * 50, 255 - id * 50);
+                        fill(id * 50, 100, 255 - id * 50);
                         rectMode(CENTER);
                         stroke(255);
                         strokeWeight(1);
@@ -398,23 +400,46 @@
     let entities;
     let tileMap;
 
+    function mousePressed() {
+        if (mouseButton === "right") {
+            entities.push(new FallingRect(
+                createVector(mouseX, mouseY),
+                createVector(32, 16),
+                -0.5
+            ));
+            return false;
+        } else {
+            entities.push(new FallingRect(
+                createVector(mouseX, mouseY),
+                createVector(32, 16)
+            ));
+        }
+    }
+
     function draw() {
-        background(200);
+        background(0, 10, 120);
 
         tileMap.draw();
         for (let entity of entities) {
-            entity.update();
             entity.draw();
+            entity.update();
         }
     }
 
     function setup() {
+        document.body.style.margin = 0;
+        addEventListener("contextmenu", e => e.preventDefault());
         createCanvas(640, 640);
         entities = [
             new Player(createVector(160, 160)),
-            new FallingRect(createVector(160, 160), createVector(48, 32)),
-            new FallingRect(createVector(320, 320), createVector(24, 16)),
         ];
+
+        for (let y = 0; y < 1; y++) {
+            entities.push(new FallingRect(
+                createVector(320, y * (Tile.SIZE * 2)), createVector(random(100), Tile.SIZE / 2)
+            ));
+        }
+
         tileMap = new TileMap(20, 20, [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
