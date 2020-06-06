@@ -187,7 +187,28 @@
         }
 
         resolveMotionCollision(aabb) {
-
+            let old = this.getOld();
+            if (this.top < aabb.bottom
+                && old.top >= aabb.bottom) {
+                this.top = aabb.bottom;
+                aabb.vel.y = this.vel.y;
+                this.onTopCollision();
+            } else if (this.bottom > aabb.top
+                && old.bottom <= aabb.top) {
+                this.bottom = aabb.top;
+                aabb.vel.y = this.vel.y;
+                this.onBottomCollision();
+            } else if (this.left < aabb.right
+                && old.left >= aabb.right) {
+                this.left = aabb.right;
+                aabb.vel.x = this.vel.x;
+                this.onLeftCollision();
+            } else if (this.right > aabb.left
+                && old.right <= aabb.left) {
+                this.right = aabb.left;
+                aabb.vel.x = this.vel.x;
+                this.onRightCollision();
+            }
         }
 
         resolveCollisions() {
@@ -199,7 +220,9 @@
                 let element = this.collisionQueue.shift();
                 if (!this.overlaps(element.aabb)) continue;
                 if (element.isInMotion) {
-                    this.resolveMotionCollision(element.aabb);
+                    if (this.getDisplacement().magSq() > element.aabb.getDisplacement().magSq()) {
+                        this.resolveMotionCollision(element.aabb);
+                    }
                 } else {
                     this.resolveStaticCollision(element.aabb);
                 }
@@ -221,7 +244,30 @@
         }
     }
 
-    class Player extends CollidingRect {
+    class FallingRect extends CollidingRect{
+        onLeftCollision() {
+            this.vel.x = 0;
+        }
+
+        onRightCollision() {
+            this.vel.x = 0;
+        }
+
+        onTopCollision() {
+            this.vel.y *= -.5;
+        }
+
+        onBottomCollision() {
+            this.vel = createVector(0, 0);
+        }
+
+        update() {
+            this.acc.y = 0.5;
+            super.update();
+        }
+    }
+
+    class Player extends FallingRect {
         constructor(center) {
             super(center, createVector(16, 16));
             this.jumping = true;
@@ -243,24 +289,10 @@
                     this.jumping = true;
                 }
             }
-
-            this.acc.y = 0.5;
-        }
-
-        onLeftCollision() {
-            this.vel.x = 0;
-        }
-
-        onRightCollision() {
-            this.vel.x = 0;
-        }
-
-        onTopCollision() {
-            this.vel.y *= -.5;
         }
 
         onBottomCollision() {
-            this.vel = createVector(0, 0);
+            super.onBottomCollision();
             this.jumping = false;
         }
 
@@ -364,7 +396,10 @@
 
     function setup() {
         createCanvas(640, 640);
-        entities = [new Player(createVector(160, 160))];
+        entities = [
+            new Player(createVector(160, 160)),
+            new FallingRect(createVector(100, 160), createVector(32, 32))
+        ];
         tileMap = new TileMap(20, 20, [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
