@@ -95,6 +95,7 @@
             if (tileY === 1) tileY++;
             this.tileArea = createVector(tileX, tileY);
             this.acc.y = grav;
+
         }
 
         onTopCollision() {
@@ -260,12 +261,13 @@
     }
 
     class FallingRect extends CollidingRect {
+        pushed = false;
         onLeftCollision() {
-            //this.vel.x = 0;
+            this.pushed = true;
         }
 
         onRightCollision() {
-            //this.vel.x = 0;
+            this.pushed = true;
         }
 
         onTopCollision() {
@@ -273,7 +275,11 @@
         }
 
         onBottomCollision() {
-            this.vel = createVector(0, 0);
+            if (!this.pushed) {
+                this.vel.x = 0;
+            }
+            this.pushed = false;
+            this.vel.y = 0;
         }
 
         update() {
@@ -285,7 +291,7 @@
         constructor(center) {
             super(center, createVector(16, 16));
             this.jumping = true;
-            this.speed = 4;
+            this.speed = 2;
         }
 
         controls() {
@@ -402,14 +408,14 @@
         if (mouseButton === "right") {
             entities.push(new FallingRect(
                 createVector(mouseX, mouseY),
-                createVector(32, 16),
+                createVector(random(32, 8),random(32, 8)),
                 -0.5
             ));
             return false;
         } else {
             entities.push(new FallingRect(
                 createVector(mouseX, mouseY),
-                createVector(32, 16)
+                createVector(random(32, 8),random(32, 8))
             ));
         }
     }
@@ -431,12 +437,6 @@
         entities = [
             new Player(createVector(160, 160)),
         ];
-
-        for (let y = 0; y < 1; y++) {
-            entities.push(new FallingRect(
-                createVector(320, y * (Tile.SIZE * 2)), createVector(random(100), Tile.SIZE / 2)
-            ));
-        }
 
         tileMap = new TileMap(20, 20, [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
