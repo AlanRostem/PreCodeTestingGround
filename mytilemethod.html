@@ -98,7 +98,7 @@
         jumping = true;
 
         constructor() {
-            super(createVector(64, 64), createVector(30, 30));
+            super(createVector(64, 64), createVector(32, 32));
             this.oldCenter = this.center.copy();
             this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
@@ -128,6 +128,7 @@
         }
 
         proximityTileScanMethod() {
+            let collisionStack = [];
             let centralTile = Tile.toTile(this.center);
             for (let x = -1; x <= 1; x++) {
                 for (let y = -1; y <= 1; y++) {
@@ -137,81 +138,47 @@
                     if (
                         xx < 0 || xx >= tileMap.width ||
                         yy < 0 || yy >= tileMap.height ||
-                        tileMap.getTileId(xx, yy) === 0 ||
-                        !this.overlaps(tile)
+                        tileMap.getTileId(xx, yy) === 0
+                        || !this.overlaps(tile)
                     ) continue;
 
-                    if (this.center.y - this.extents.y < tile.center.y + tile.extents.y &&
-                        this.oldCenter.y - this.extents.y >= tile.center.y + tile.extents.y) {
-                        this.center.y = tile.center.y + tile.extents.y + this.extents.y;
-                        this.topColl();
-                    }
+                    collisionStack.push({aabb: tile, mag: p5.Vector.sub(tile.center, this.center).magSq()});
+                }
+            }
 
-                    if (this.center.y + this.extents.y > tile.center.y - tile.extents.y &&
-                        this.oldCenter.y + this.extents.y <= tile.center.y - tile.extents.y) {
-                        this.center.y = tile.center.y - tile.extents.y - this.extents.y;
-                        this.bottomColl();
-                    }
+            collisionStack.sort((a, b) => {
+                return a.mag - b.mag;
+            });
 
-                    if (this.center.x - this.extents.x < tile.center.x + tile.extents.x &&
-                        this.oldCenter.x - this.extents.x >= tile.center.x + tile.extents.x) {
-                        this.center.x = tile.center.x + tile.extents.x + this.extents.x;
-                        this.leftColl();
-                    }
-
-                    if (this.center.x + this.extents.y > tile.center.x - tile.extents.x &&
-                        this.oldCenter.x + this.extents.y <= tile.center.x - tile.extents.x) {
-                        this.center.x = tile.center.x - tile.extents.x - this.extents.x;
-                        this.rightColl();
-                    }
-
-
+            while (collisionStack.length !== 0) {
+                let aabb = collisionStack.shift().aabb;
+                if (!this.overlaps(aabb)) continue;
+                if (this.center.y - this.extents.y < aabb.center.y + aabb.extents.y
+                    && this.oldCenter.y - this.extents.y >= aabb.center.y + aabb.extents.y) {
+                    this.center.y = aabb.center.y + aabb.extents.y + this.extents.y;
+                    this.topColl();
+                }
+                if (this.center.y + this.extents.y > aabb.center.y - aabb.extents.y
+                    && this.oldCenter.y + this.extents.y <= aabb.center.y - aabb.extents.y) {
+                    this.center.y = aabb.center.y - aabb.extents.y - this.extents.y;
+                    this.bottomColl();
+                }
+                if (this.center.x - this.extents.x < aabb.center.x + aabb.extents.x
+                    && this.oldCenter.x - this.extents.x >= aabb.center.x + aabb.extents.x) {
+                    this.center.x = aabb.center.x + aabb.extents.x + this.extents.x;
+                    this.leftColl();
+                }
+                if (this.center.x + this.extents.y > aabb.center.x - aabb.extents.x
+                    && this.oldCenter.x + this.extents.y <= aabb.center.x - aabb.extents.x) {
+                    this.center.x = aabb.center.x - aabb.extents.x - this.extents.x;
+                    this.rightColl();
                 }
             }
         }
 
-        cornerCheckMethod() {
-            let topLeft = Tile.toTile({
-                x: this.center.x - this.extents.x,
-                y: this.center.y - this.extents.y,
-            });
-
-            if (tileMap.getTileId(topLeft.x, topLeft.y) > 0) {
-
-            }
-
-            let topRight = Tile.toTile({
-                x: this.center.x + this.extents.x,
-                y: this.center.y - this.extents.y,
-            });
-
-            if (tileMap.getTileId(topRight.x, topRight.y) > 0) {
-
-            }
-
-            let bottomLeft = Tile.toTile({
-                x: this.center.x - this.extents.x,
-                y: this.center.y + this.extents.y,
-            });
-
-            if (tileMap.getTileId(bottomLeft.x, bottomLeft.y) > 0) {
-
-            }
-
-            let bottomRight = Tile.toTile({
-                x: this.center.x + this.extents.x,
-                y: this.center.y + this.extents.y,
-            });
-
-            if (tileMap.getTileId(bottomRight.x, bottomRight.y) > 0) {
-
-            }
-
-        }
 
         tileCollision() {
             this.proximityTileScanMethod();
-            // this.cornerCheckMethod();
         }
 
         walking() {
