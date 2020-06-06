@@ -135,11 +135,14 @@
 
         scanTiles() {
             let centralTile = Tile.toTile(this.center);
-            for (let x = -1; x < this.tileArea.x; x++) {
-                for (let y = -1; y < this.tileArea.y; y++) {
+            for (let x = -this.tileArea.x + 1; x < this.tileArea.x; x++) {
+                for (let y = -this.tileArea.y + 1; y < this.tileArea.y; y++) {
                     let xx = centralTile.x + x;
                     let yy = centralTile.y + y;
                     let tile = new Tile(xx, yy).toAABB();
+                    stroke(255);
+                    fill(255,255,255, 100);
+                    rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
                     if (
                         xx < 0 || xx >= tileMap.width ||
                         yy < 0 || yy >= tileMap.height ||
