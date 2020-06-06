@@ -87,6 +87,12 @@
         constructor(center, extents) {
             super(center, extents);
             this.collisionQueue = [];
+            const proxy = 1;
+            let tileX = Math.round(this.extents.x * 2 / Tile.SIZE + proxy);
+            let tileY = Math.round(this.extents.y * 2 / Tile.SIZE + proxy);
+            if (tileX === 1) tileX++;
+            if (tileY === 1) tileY++;
+            this.tileArea = createVector(tileX, tileY);
         }
 
         onTopCollision() {
@@ -129,8 +135,8 @@
 
         scanTiles() {
             let centralTile = Tile.toTile(this.center);
-            for (let x = -1; x <= 1; x++) {
-                for (let y = -1; y <= 1; y++) {
+            for (let x = -1; x < this.tileArea.x; x++) {
+                for (let y = -1; y < this.tileArea.y; y++) {
                     let xx = centralTile.x + x;
                     let yy = centralTile.y + y;
                     let tile = new Tile(xx, yy).toAABB();
@@ -158,11 +164,11 @@
 
         // Remember to add in the pointer to the AABB that has motion properties
         reserveMotionCollisionTo(aabb, distance) {
-            this.collisionQueue.push({ aabb: aabb, priority: distance, isInMotion: true });
+            this.collisionQueue.push({aabb: aabb, priority: distance, isInMotion: true});
         }
 
         reserveStaticCollisionTo(aabb, distance) {
-            this.collisionQueue.push({ aabb: aabb, priority: distance, isInMotion: false });
+            this.collisionQueue.push({aabb: aabb, priority: distance, isInMotion: false});
         }
 
         resolveStaticCollision(aabb) {
@@ -244,7 +250,7 @@
         }
     }
 
-    class FallingRect extends CollidingRect{
+    class FallingRect extends CollidingRect {
         onLeftCollision() {
             this.vel.x = 0;
         }
@@ -398,7 +404,8 @@
         createCanvas(640, 640);
         entities = [
             new Player(createVector(160, 160)),
-            new FallingRect(createVector(100, 160), createVector(32, 32))
+            new FallingRect(createVector(160, 160), createVector(48, 32)),
+            new FallingRect(createVector(320, 320), createVector(24, 16)),
         ];
         tileMap = new TileMap(20, 20, [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -419,7 +426,7 @@
             8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
             6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2,
             4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         ]);
     }
