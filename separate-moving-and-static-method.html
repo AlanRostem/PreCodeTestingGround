@@ -140,9 +140,6 @@
                     let xx = centralTile.x + x;
                     let yy = centralTile.y + y;
                     let tile = new Tile(xx, yy).toAABB();
-                    stroke(255);
-                    fill(255,255,255, 100);
-                    rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
                     if (
                         xx < 0 || xx >= tileMap.width ||
                         yy < 0 || yy >= tileMap.height ||
@@ -151,6 +148,10 @@
                     ) continue;
 
                     this.reserveStaticCollisionTo(tile, p5.Vector.sub(this.center, tile.center).magSq());
+                    noFill();
+                    stroke(255, 0, 0);
+                    rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
+                    noStroke();
                 }
             }
         }
@@ -196,6 +197,10 @@
         }
 
         resolveMotionCollision(aabb) {
+            noFill();
+            stroke(255, 0, 0);
+            rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
+            noStroke();
             let old = this.getOld();
             if (this.top < aabb.bottom
                 && old.top >= aabb.bottom) {
