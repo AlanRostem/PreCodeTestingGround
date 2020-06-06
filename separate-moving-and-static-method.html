@@ -127,11 +127,88 @@
             }
         }
 
-        resolveCollisions() {
+        scanTiles() {
+            let centralTile = Tile.toTile(this.center);
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new Tile(xx, yy).toAABB();
+                    if (
+                        xx < 0 || xx >= tileMap.width ||
+                        yy < 0 || yy >= tileMap.height ||
+                        tileMap.getTileId(xx, yy) === 0 ||
+                        !this.overlaps(tile)
+                    ) continue;
+
+                    this.reserveStaticCollisionTo(tile, p5.Vector.sub(this.center, tile.center).magSq());
+                }
+            }
+        }
+
+        scanEntities() {
+            for (let entity of entities) {
+                if (entity !== this) {
+                    if (this.overlaps(entity)) {
+                        this.reserveMotionCollisionTo(entity, p5.Vector.sub(this.center, entity.center).magSq());
+                    }
+                }
+            }
+        }
+
+        // Remember to add in the pointer to the AABB that has motion properties
+        reserveMotionCollisionTo(aabb, distance) {
+            this.collisionQueue.push({ aabb: aabb, priority: distance, isInMotion: true });
+        }
+
+        reserveStaticCollisionTo(aabb, distance) {
+            this.collisionQueue.push({ aabb: aabb, priority: distance, isInMotion: false });
+        }
+
+        resolveStaticCollision(aabb) {
+            let old = this.getOld();
+            if (this.top < aabb.bottom
+                && old.top >= aabb.bottom) {
+                this.top = aabb.bottom;
+                this.onTopCollision();
+            } else if (this.bottom > aabb.top
+                && old.bottom <= aabb.top) {
+                this.bottom = aabb.top;
+                this.onBottomCollision();
+            } else if (this.left < aabb.right
+                && old.left >= aabb.right) {
+                this.left = aabb.right;
+                this.onLeftCollision();
+            } else if (this.right > aabb.left
+                && old.right <= aabb.left) {
+                this.right = aabb.left;
+                this.onRightCollision();
+            }
+        }
+
+        resolveMotionCollision(aabb) {
 
         }
 
+        resolveCollisions() {
+            this.collisionQueue.sort((a, b) => {
+                return a.priority - b.priority;
+            });
+
+            while (this.collisionQueue.length !== 0) {
+                let element = this.collisionQueue.shift();
+                if (!this.overlaps(element.aabb)) continue;
+                if (element.isInMotion) {
+                    this.resolveMotionCollision(element.aabb);
+                } else {
+                    this.resolveStaticCollision(element.aabb);
+                }
+            }
+        }
+
         detectCollisions() {
+            this.scanTiles();
+            this.scanEntities();
         }
 
         update() {
@@ -170,6 +247,23 @@
             this.acc.y = 0.5;
         }
 
+        onLeftCollision() {
+            this.vel.x = 0;
+        }
+
+        onRightCollision() {
+            this.vel.x = 0;
+        }
+
+        onTopCollision() {
+            this.vel.y *= -.5;
+        }
+
+        onBottomCollision() {
+            this.vel = createVector(0, 0);
+            this.jumping = false;
+        }
+
         update() {
             this.controls();
             super.update();
@@ -199,7 +293,7 @@
             return new AABB(createVector(
                 this.x * Tile.SIZE + Tile.SIZE / 2,
                 this.y * Tile.SIZE + Tile.SIZE / 2,
-            ), Tile.SIZE / 2, Tile.SIZE / 2);
+            ), createVector(Tile.SIZE / 2, Tile.SIZE / 2));
         }
 
         static toTile(vec) {
@@ -284,13 +378,13 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
+            10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+            8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+            6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2,
+            4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+            2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         ]);
     }
