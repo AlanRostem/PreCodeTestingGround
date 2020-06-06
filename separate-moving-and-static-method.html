@@ -151,11 +151,6 @@
                     ) continue;
 
                     this.reserveStaticCollisionTo(tile, p5.Vector.sub(this.center, tile.center).magSq());
-
-                    noFill();
-                    stroke(255, 0, 0);
-                    rect(tile.center.x, tile.center.y, tile.extents.x * 2, tile.extents.y * 2);
-                    noStroke();
                 }
             }
         }
@@ -180,22 +175,30 @@
         }
 
         resolveStaticCollision(aabb) {
+            noFill();
+            stroke(255, 0, 0);
+            rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
+            noStroke();
             let old = this.getOld();
+            let threshHold = {
+                x: ((this.extents.x * 2) % Tile.SIZE !== 0) ? 0.01 : 0,
+                y: ((this.extents.y * 2) % Tile.SIZE !== 0) ? 0.01 : 0,
+            };
             if (this.top < aabb.bottom
                 && old.top >= aabb.bottom) {
-                this.top = aabb.bottom;
+                this.top = aabb.bottom + threshHold.y;
                 this.onTopCollision();
             } else if (this.bottom > aabb.top
                 && old.bottom <= aabb.top) {
-                this.bottom = aabb.top;
+                this.bottom = aabb.top - threshHold.y;
                 this.onBottomCollision();
             } else if (this.left < aabb.right
                 && old.left >= aabb.right) {
-                this.left = aabb.right;
+                this.left = aabb.right + threshHold.x;
                 this.onLeftCollision();
             } else if (this.right > aabb.left
                 && old.right <= aabb.left) {
-                this.right = aabb.left;
+                this.right = aabb.left - threshHold.x;
                 this.onRightCollision();
             }
         }
@@ -408,14 +411,17 @@
         if (mouseButton === "right") {
             entities.push(new FallingRect(
                 createVector(mouseX, mouseY),
-                createVector(random(32, 8),random(32, 8)),
+                //createVector(random(32, 8),random(32, 8)),
+                createVector(16, 16),
                 -0.5
             ));
             return false;
         } else {
             entities.push(new FallingRect(
                 createVector(mouseX, mouseY),
-                createVector(random(32, 8),random(32, 8))
+                //createVector(random(32, 8),random(32, 8)),
+                createVector(16, 16),
+
             ));
         }
     }
