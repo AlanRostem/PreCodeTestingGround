@@ -84,7 +84,7 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            this.vel = createVector(random(-100, 100),random(-100, 100));
+            this.vel = createVector();//random(-100, 100),random(-100, 100));
             this.acc = createVector();
         }
 
@@ -199,17 +199,17 @@
                 let remainingTime = 1 - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(this.vel, nearest.normal) * remainingTime;
 
-                /*
-                let velx = this.vel.x = nearest.normal.x * dotProduct;
-                let vely = this.vel.y = nearest.normal.y * dotProduct;
-                this.center.x += this.vel.x * deltaTime / 1000;
-                this.center.y += this.vel.y * deltaTime / 1000;
                 stroke(255, 0, 0);
                 line(
                     this.center.x,
                     this.center.y,
-                    this.center.x + velx * deltaTime / 1000,
-                    this.center.y + vely * deltaTime / 1000);*/
+                    this.center.x + nearest.normal.x * 32,
+                    this.center.y + nearest.normal.y * 32);
+
+                this.vel.x = nearest.normal.x * dotProduct;
+                this.vel.y = nearest.normal.y * dotProduct;
+                this.center.x += this.vel.x * deltaTime / 1000;
+                this.center.y += this.vel.y * deltaTime / 1000;
             } else {
                 this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
             }
@@ -241,7 +241,7 @@
             let exitTime = createVector(0, 0);
 
             if (velocity.x === 0) {
-                entryTime.x = Infinity;
+                entryTime.x = -Infinity;
                 exitTime.x = Infinity;
             } else {
                 entryTime.x = deltaEntry.x / velocity.x;
@@ -249,7 +249,7 @@
             }
 
             if (velocity.y === 0) {
-                entryTime.y = Infinity;
+                entryTime.y = -Infinity;
                 exitTime.y = Infinity;
             } else {
                 entryTime.y = deltaEntry.y / velocity.y;
@@ -262,9 +262,13 @@
             let resultTime = 1;
             let normal = createVector();
 
-            if (!(maxEntryTime > minExitTime || (entryTime.x < 0 && entryTime.y < 0) || entryTime.x > 1 || entryTime.y > 1)) {
+            if (!(maxEntryTime > minExitTime ||
+                (entryTime.x < 0 && entryTime.y < 0)
+                || entryTime.x > 1
+                || entryTime.y > 1
+            )) {
                 resultTime = maxEntryTime;
-                if (entryTime.x > entryTime.y) {
+                if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) { // <- HAHAAHAH d låg her xDDDDDD de glømte abs djhdsjkdhjk
                     if (deltaEntry.x < 0) {
                         normal = createVector(1, 0);
                     } else {
