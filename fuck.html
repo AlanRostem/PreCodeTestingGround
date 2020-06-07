@@ -62,27 +62,27 @@
             addEventListener('keydown', keyEvent);
             addEventListener('keyup', keyEvent);
             focus();
-        },
+    },
 
-        clear() {
-            var minSize = Math.min(innerWidth, innerHeight);
-            if (this.ctx.canvas.width !== minSize || this.ctx.canvas.height !== minSize) {
-                this.ctx.canvas.width = minSize;
-                this.ctx.canvas.height = minSize;
-            }
+    clear() {
+        var minSize = Math.min(innerWidth, innerHeight);
+        if (this.ctx.canvas.width !== minSize || this.ctx.canvas.height !== minSize) {
+            this.ctx.canvas.width = minSize;
+            this.ctx.canvas.height = minSize;
+        }
 
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            // the next line scales the canvas rendering to fit.
-            this.ctx.setTransform(
-                minSize / (levelCols * tileX),
-                0,
-                0,
-                minSize / (levelRows * tileY),
-                0, 0
-            );
-        },
+        // the next line scales the canvas rendering to fit.
+        this.ctx.setTransform(
+            minSize / (levelCols * tileX),
+            0,
+            0,
+            minSize / (levelRows * tileY),
+            0, 0
+        );
+    },
         render() {
             var ctx = this.ctx;
             for (i = 0; i < levelRows; i++) {

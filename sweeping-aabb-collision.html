@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swept AABB Collision Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+</head>
+<body>
+<script>
+    class AABB {
+        constructor(center, extents) {
+            this.center = center;
+            this.extents = extents;
+            this.color = color(random(100), random(100), random(100))
+        }
+
+        overlaps(aabb) {
+            return (Math.abs(this.center.x - aabb.center.x) * 2 < (this.extents.x + aabb.extents.x) * 2) &&
+                (Math.abs(this.center.y - aabb.center.y) * 2 < (this.extents.y + aabb.extents.y) * 2);
+        }
+
+        constrainPositionToScreen() {
+            if (this.top < 0) {
+                this.top = 0;
+            }
+
+            if (this.bottom > height) {
+                this.bottom = height;
+            }
+
+            if (this.left < 0) {
+                this.left = 0;
+            }
+
+            if (this.right > width) {
+                this.right = width;
+            }
+        }
+
+        get top() {
+            return this.center.y - this.extents.y;
+        }
+
+        set top(y) {
+            this.center.y = y + this.extents.y;
+        }
+
+        get bottom() {
+            return this.center.y + this.extents.y;
+        }
+
+        set bottom(y) {
+            this.center.y = y - this.extents.y;
+        }
+
+        get left() {
+            return this.center.x - this.extents.x;
+        }
+
+        set left(x) {
+            this.center.x = x + this.extents.x;
+        }
+
+        get right() {
+            return this.center.x + this.extents.x;
+        }
+
+        set right(x) {
+            this.center.x = x - this.extents.x;
+        }
+
+        update() {
+            this.constrainPositionToScreen();
+        }
+
+        draw() {
+            fill(this.color);
+            rectMode(CENTER);
+            stroke(255);
+            rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
+        }
+    }
+
+    class MovingAABB extends AABB {
+        constructor(center, extents) {
+            super(center, extents);
+            this.vel = createVector();
+            this.acc = createVector();
+        }
+
+        updateMovement() {
+            this.vel.add(p5.Vector.mult(this.acc, deltaTime / 1000));
+            // this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000));
+        }
+
+        update() {
+            this.updateMovement();
+            super.update();
+        }
+    }
+
+    class Sweep {
+        constructor(collisionTime = 1, normal = createVector(0, 0)) {
+            this.collisionTime = collisionTime;
+            this.normal = normal;
+        }
+    }
+
+    class CollisionStack {
+        static #MAX_LENGTH = 5;
+        #array = [];
+
+        constructor(...args) {
+            this.#array = args;
+        }
+
+        push(sweep) {
+            if (!this.isFull())
+                this.#array.push(sweep);
+        }
+
+        pop() {
+            return this.#array.shift();
+        }
+
+        isFull() {
+            return this.#array.length === CollisionStack.#MAX_LENGTH;
+        }
+
+        isEmpty() {
+            return this.#array.length === 0;
+        }
+    }
+
+    class CollidingAABB extends MovingAABB {
+        update() {
+            this.checkCollision();
+            this.updateMovement();
+
+            let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
+            this.collisionBoundary = new AABB(this.center,
+                p5.Vector.mult(absVel, deltaTime / 1000).add(this.extents)
+            );
+
+            this.constrainPositionToScreen();
+        }
+
+        draw() {
+            super.draw();
+            noFill();
+            stroke(255, 255, 0);
+            strokeWeight(2);
+            rect(
+                this.collisionBoundary.center.x,
+                this.collisionBoundary.center.y,
+                this.collisionBoundary.extents.x * 2,
+                this.collisionBoundary.extents.y * 2,
+            )
+        }
+
+        checkCollision() {
+            let nearest;
+            for (let entity of entities) {
+                if (entity !== this) {
+                    if (this.collisionBoundary.overlaps(entity)) {
+                        let sweep = this.getSweepObject(entity);
+                        if (nearest) {
+                            if (sweep.collisionTime < nearest.collisionTime) {
+                                nearest = sweep;
+                            }
+                        } else {
+                            nearest = sweep;
+                        }
+                    }
+                }
+            }
+
+            if (nearest) {
+                this.center.x += this.vel.x * nearest.collisionTime * deltaTime / 1000;
+                this.center.y += this.vel.y * nearest.collisionTime * deltaTime / 1000;
+            } else {
+                this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
+            }
+        }
+
+        getSweepObject(aabb) {
+            let deltaEntry = createVector(0, 0);
+            let deltaExit = createVector(0, 0);
+
+            let velocity = p5.Vector.mult(this.vel, deltaTime / 1000);
+
+            if (velocity.x > 0) {
+                deltaEntry.x = aabb.left - this.right;
+                deltaExit.x = aabb.right - this.left;
+            } else {
+                deltaEntry.x = aabb.right - this.left;
+                deltaExit.x = aabb.left - this.right;
+            }
+
+            if (velocity.y > 0) {
+                deltaEntry.y = aabb.top - this.bottom;
+                deltaExit.y = aabb.bottom - this.top;
+            } else {
+                deltaEntry.y = aabb.bottom - this.top;
+                deltaExit.y = aabb.top - this.bottom;
+            }
+
+            let entryTime = createVector(0, 0);
+            let exitTime = createVector(0, 0);
+
+            if (velocity.x === 0) {
+                entryTime.x = Infinity;
+                exitTime.x = Infinity;
+            } else {
+                entryTime.x = deltaEntry.x / velocity.x;
+                exitTime.x = deltaExit.x / velocity.x;
+            }
+
+            if (velocity.y === 0) {
+                entryTime.y = Infinity;
+                exitTime.y = Infinity;
+            } else {
+                entryTime.y = deltaEntry.y / velocity.y;
+                exitTime.y = deltaExit.y / velocity.y;
+            }
+
+            let maxEntryTime = Math.max(entryTime.x, entryTime.y);
+            let minExitTime = Math.min(exitTime.x, exitTime.y);
+
+            let resultTime;
+            let normal;
+
+            if (maxEntryTime > minExitTime || (entryTime.x < 0 && entryTime.y < 0) || entryTime.x > 1 || entryTime.y > 1) {
+                resultTime = 1;
+                normal = createVector();
+            } else {
+                resultTime = maxEntryTime;
+                if (deltaEntry.x > deltaEntry.y) {
+                    if (deltaEntry.x < 0) {
+                        normal = createVector(1, 0);
+                    } else {
+                        normal = createVector(-1, 0);
+                    }
+                } else {
+                    if (deltaEntry.y < 0) {
+                        normal = createVector(0, 1);
+                    } else {
+                        normal = createVector(0, -1);
+                    }
+                }
+            }
+
+            return new Sweep(resultTime, normal);
+        }
+    }
+
+    let entities;
+    let player;
+
+    function mousePressed() {
+        entities.push(
+            new MovingAABB(
+                createVector(mouseX, mouseY),
+                createVector(random(32, 16), random(32, 16)),
+            ));
+    }
+
+    function setup() {
+        createCanvas(640, 640);
+        document.body.style.margin = 0;
+        player = new CollidingAABB(createVector(320, 320), createVector(16, 16));
+        entities = [player];
+    }
+
+    function draw() {
+        background(0);
+        for (let entity of entities) {
+            entity.update();
+            entity.draw();
+        }
+
+        player.vel = createVector(
+            mouseX - player.center.x,
+            mouseY - player.center.y,
+        );
+    }
+</script>
+</body>
+</html>
