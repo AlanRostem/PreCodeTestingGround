@@ -84,8 +84,9 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            this.vel = createVector();//random(-100, 100),random(-100, 100));
-            this.acc = createVector();
+            this.vel = createVector();
+            let tall = 10;
+            this.acc = createVector(random(-tall, tall), random(-tall, tall));
         }
 
         updateMovement() {
@@ -203,13 +204,11 @@
                 line(
                     this.center.x,
                     this.center.y,
-                    this.center.x + nearest.normal.x * 32,
-                    this.center.y + nearest.normal.y * 32);
+                    this.center.x + nearest.normal.x * this.extents.x,
+                    this.center.y + nearest.normal.y * this.extents.y);
 
-                this.vel.x = nearest.normal.x * dotProduct;
-                this.vel.y = nearest.normal.y * dotProduct;
-                this.center.x += this.vel.x * deltaTime / 1000;
-                this.center.y += this.vel.y * deltaTime / 1000;
+                this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
+                this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
             } else {
                 this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
             }
@@ -287,6 +286,17 @@
         }
     }
 
+    class Player extends CollidingAABB {
+        acc = createVector();
+
+        update() {
+            this.checkCollision();
+            this.updateMovement();
+
+            this.constrainPositionToScreen();
+        }
+    }
+
     let entities;
     let player;
 
@@ -302,7 +312,7 @@
     function setup() {
         createCanvas(640, 640);
         document.body.style.margin = 0;
-        player = new CollidingAABB(createVector(320, 320), createVector(16, 16));
+        player = new Player(createVector(320, 320), createVector(16, 16));
         entities = [player];
     }
 
