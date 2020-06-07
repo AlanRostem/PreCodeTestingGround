@@ -199,17 +199,17 @@
                 let remainingTime = 1 - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(this.vel, nearest.normal) * remainingTime;
 
-                this.vel.x = nearest.normal.x * dotProduct;
-                this.vel.y = nearest.normal.y * dotProduct;
-
+                let velx = nearest.normal.x * dotProduct;
+                let vely = nearest.normal.y * dotProduct;
+                console.log(nearest.normal);
                 // this.center.x += this.vel.x * deltaTime / 1000;
                 // this.center.y += this.vel.y * deltaTime / 1000;
                 stroke(255, 0, 0);
                 line(
                     this.center.x,
                     this.center.y,
-                    this.center.x + this.vel.x * deltaTime / 1000,
-                    this.center.y + this.vel.y * deltaTime / 1000);
+                    this.center.x + velx * deltaTime / 1000,
+                    this.center.y + vely * deltaTime / 1000);
             } else {
                 this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
             }
