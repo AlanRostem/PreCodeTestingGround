@@ -142,6 +142,7 @@
             this.updateMovement();
 
             this.constrainPositionToScreen();
+            this.collisionStack = [];
         }
 
         getCollisionBoundary() {
@@ -183,7 +184,7 @@
             let toIterate = this.collisionStack;
             if (this.collisionStack.length === 0) toIterate = entities;
             else this.collisionStack = [];
-
+            toIterate = entities;
             let nearest;
 
             for (let entity of toIterate) {
@@ -202,23 +203,23 @@
                 }
             }
 
-            if (nearest && nearest.collisionTime <= remainingTime) {
-                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
-                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
+            if (nearest) {
+                    this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
+                    this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
                 nearest.normal.mult(dotProduct);
 
-                if (time > 0 && count < 5)
+                if (time > 0)
                     this.checkCollision(nearest.normal, time, count + 1);
 
                 stroke(255, 0, 0);
                 line(
                     this.center.x,
                     this.center.y,
-                    this.center.x + nearest.normal.x * this.extents.x,
-                    this.center.y + nearest.normal.y * this.extents.y);
+                    this.center.x + nearest.normal.x/dotProduct * this.extents.x,
+                    this.center.y + nearest.normal.y/dotProduct * this.extents.y);
 
                 //this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
                 //this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
