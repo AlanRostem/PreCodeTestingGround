@@ -135,7 +135,7 @@
 
     class CollidingAABB extends MovingAABB {
         update() {
-            this.checkCollision();
+            this.checkCollision(this.vel);
             this.updateMovement();
 
             this.constrainPositionToScreen();
@@ -176,7 +176,7 @@
             )
         }
 
-        checkCollision() {
+        checkCollision(movement) {
             let nearest;
             for (let entity of entities) {
                 if (entity !== this) {
@@ -194,11 +194,11 @@
             }
 
             if (nearest) {
-                this.center.x += this.vel.x * nearest.collisionTime * deltaTime / 1000;
-                this.center.y += this.vel.y * nearest.collisionTime * deltaTime / 1000;
+                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
+                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
 
                 let remainingTime = 1 - nearest.collisionTime;
-                let dotProduct = p5.Vector.dot(this.vel, nearest.normal) * remainingTime;
+                let dotProduct = p5.Vector.dot(movement, nearest.normal) * remainingTime;
 
                 stroke(255, 0, 0);
                 line(
@@ -210,7 +210,7 @@
                 this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
                 this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
             } else {
-                this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
+                this.center.add(p5.Vector.mult(movement, deltaTime / 1000))
             }
         }
 
@@ -290,7 +290,7 @@
         acc = createVector();
 
         update() {
-            this.checkCollision();
+            this.checkCollision(this.vel);
             this.updateMovement();
 
             this.constrainPositionToScreen();
