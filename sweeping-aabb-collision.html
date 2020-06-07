@@ -134,7 +134,9 @@
     }
 
     class CollidingAABB extends MovingAABB {
+        collisionStack = [];
         update() {
+            this.boundary = this.getCollisionBoundary();
             this.checkCollision(this.vel);
             this.updateMovement();
 
@@ -177,11 +179,17 @@
         }
 
         checkCollision(movement) {
+            let toIterate = this.collisionStack;
+            if (this.collisionStack.length === 0) toIterate = entities;
+            else this.collisionStack = [];
+
             let nearest;
-            for (let entity of entities) {
+
+            for (let entity of toIterate) {
                 if (entity !== this) {
                     if (this.getCollisionBoundary().overlaps(entity)) {
                         let sweep = this.getSweepObject(entity);
+                        this.collisionStack.push(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
                                 nearest = sweep;
