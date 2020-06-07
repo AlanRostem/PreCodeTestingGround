@@ -84,9 +84,9 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            this.vel = createVector();
-            let tall = 10;
-            this.acc = createVector(random(-tall, tall), random(-tall, tall));
+            let tall = 50;
+            this.vel = createVector(random(-tall, tall), random(-tall, tall));
+            this.acc = createVector(0, 0);
         }
 
         updateMovement() {
