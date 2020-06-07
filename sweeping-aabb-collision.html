@@ -134,13 +134,12 @@
 
     class CollidingAABB extends MovingAABB {
         update() {
-            this.checkCollision();
-            this.updateMovement();
-
             let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
             this.collisionBoundary = new AABB(this.center,
                 p5.Vector.mult(absVel, deltaTime / 1000).add(this.extents)
             );
+            this.checkCollision();
+            this.updateMovement();
 
             this.constrainPositionToScreen();
         }
@@ -258,11 +257,12 @@
     let player;
 
     function mousePressed() {
-        entities.push(
-            new MovingAABB(
-                createVector(mouseX, mouseY),
-                createVector(random(32, 16), random(32, 16)),
-            ));
+        if (mouseButton !== "right" && mouseButton !== "center")
+            entities.push(
+                new MovingAABB(
+                    createVector(mouseX, mouseY),
+                    createVector(random(32, 16), random(32, 16)),
+                ));
     }
 
     function setup() {
@@ -274,14 +274,15 @@
 
     function draw() {
         background(0);
+        frameRate(10);
         for (let entity of entities) {
             entity.update();
             entity.draw();
         }
 
         player.vel = createVector(
-            mouseX - player.center.x,
-            mouseY - player.center.y,
+            (mouseX - player.center.x) * 10,
+            (mouseY - player.center.y) * 10,
         );
     }
 </script>
