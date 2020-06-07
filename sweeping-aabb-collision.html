@@ -134,14 +134,31 @@
 
     class CollidingAABB extends MovingAABB {
         update() {
-            let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
-            this.collisionBoundary = new AABB(this.center,
-                p5.Vector.mult(absVel, deltaTime / 1000).add(this.extents)
-            );
             this.checkCollision();
             this.updateMovement();
 
             this.constrainPositionToScreen();
+        }
+
+        getCollisionBoundary() {
+            let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
+            let vel = p5.Vector.mult(this.vel, deltaTime / 1000);
+            if (vel.x > 0) {
+                collisionBoundary.extents.x = this.extents.x + vel.x;
+                collisionBoundary.left = this.left;
+            } else {
+                collisionBoundary.extents.x = this.extents.x - vel.x;
+                collisionBoundary.right = this.right;
+            }
+
+            if (vel.y > 0) {
+                collisionBoundary.extents.y = this.extents.y + vel.y;
+                collisionBoundary.top = this.top;
+            } else {
+                collisionBoundary.extents.y = this.extents.y - vel.y;
+                collisionBoundary.bottom = this.bottom;
+            }
+            return collisionBoundary;
         }
 
         draw() {
@@ -149,11 +166,12 @@
             noFill();
             stroke(255, 255, 0);
             strokeWeight(2);
+            let collisionBoundary = this.getCollisionBoundary();
             rect(
-                this.collisionBoundary.center.x,
-                this.collisionBoundary.center.y,
-                this.collisionBoundary.extents.x * 2,
-                this.collisionBoundary.extents.y * 2,
+                collisionBoundary.center.x,
+                collisionBoundary.center.y,
+                collisionBoundary.extents.x * 2,
+                collisionBoundary.extents.y * 2,
             )
         }
 
@@ -161,7 +179,7 @@
             let nearest;
             for (let entity of entities) {
                 if (entity !== this) {
-                    if (this.collisionBoundary.overlaps(entity)) {
+                    if (this.getCollisionBoundary().overlaps(entity)) {
                         let sweep = this.getSweepObject(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
@@ -177,6 +195,21 @@
             if (nearest) {
                 this.center.x += this.vel.x * nearest.collisionTime * deltaTime / 1000;
                 this.center.y += this.vel.y * nearest.collisionTime * deltaTime / 1000;
+
+                let remainingTime = 1 - nearest.collisionTime;
+                let dotProduct = p5.Vector.dot(this.vel, nearest.normal) * remainingTime;
+
+                this.vel.x = nearest.normal.x * dotProduct;
+                this.vel.y = nearest.normal.y * dotProduct;
+
+                // this.center.x += this.vel.x * deltaTime / 1000;
+                // this.center.y += this.vel.y * deltaTime / 1000;
+                stroke(255, 0, 0);
+                line(
+                    this.center.x,
+                    this.center.y,
+                    this.center.x + this.vel.x * deltaTime / 1000,
+                    this.center.y + this.vel.y * deltaTime / 1000);
             } else {
                 this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000))
             }
@@ -274,10 +307,12 @@
 
     function draw() {
         background(0);
-        frameRate(10);
+        frameRate(144);
+        for (let entity of entities) {
+            entity.draw();
+        }
         for (let entity of entities) {
             entity.update();
-            entity.draw();
         }
 
         player.vel = createVector(
