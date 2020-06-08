@@ -147,15 +147,16 @@
         draw() {
             super.draw();
             noFill();
-            stroke(255, 255, 0);
-            strokeWeight(2);
+            //stroke(255, 255, 0);
+            noStroke();
+            //strokeWeight(2);
             let collisionBoundary = this.getCollisionBoundary();
-            rect(
+            /*rect(
                 collisionBoundary.center.x,
                 collisionBoundary.center.y,
                 collisionBoundary.extents.x * 2,
                 collisionBoundary.extents.y * 2,
-            )
+            )*/
         }
 
         checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000) {
