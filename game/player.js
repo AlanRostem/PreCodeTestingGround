@@ -20,6 +20,14 @@ export default class Player extends Entity {
         }
     }
 
+    onLeftCollision() {
+        this.body.vel.x = 0;
+    }
+
+    onRightCollision() {
+        this.body.vel.x = 0;
+    }
+
     onBottomCollision() {
         this.jumping = false;
         this.body.vel.x = 0;

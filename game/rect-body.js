@@ -1,10 +1,21 @@
 import AABB from "./aabb.js"
 import Sweep from "./sweep.js"
+import Tile from "./tile.js"
 
 export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
     collisionStack = [];
+
+    constructor(c, e) {
+        super(c, e);
+        const proxy = 1;
+        let tileX = Math.round(this.extents.x * 2 / Tile.SIZE + proxy);
+        let tileY = Math.round(this.extents.y * 2 / Tile.SIZE + proxy);
+        if (tileX === 1) tileX++;
+        if (tileY === 1) tileY++;
+        this.tileArea = createVector(tileX, tileY);
+    }
 
     getCollisionBoundary(deltaTime, movement = this.vel) {
         let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
@@ -37,10 +48,29 @@ export default class RectBody extends AABB {
         }
     }
 
+    scanTiles(tileMap, deltaTime) {
+        let centralTile = Tile.toTile(this.center);
+        for (let x = -this.tileArea.x + 1; x < this.tileArea.x; x++) {
+            for (let y = -this.tileArea.y + 1; y < this.tileArea.y; y++) {
+                let xx = centralTile.x + x;
+                let yy = centralTile.y + y;
+                let tile = new Tile(xx, yy).toAABB();
+                if (
+                    xx < 0 || xx >= tileMap.width ||
+                    yy < 0 || yy >= tileMap.height ||
+                    tileMap.getTileId(xx, yy) === 0 ||
+                    !this.getCollisionBoundary(deltaTime).overlaps(tile)
+                ) continue;
+
+                this.collisionStack.push(tile);
+            }
+        }
+    }
+
     update(world, deltaTime) {
         this.vel.add(p5.Vector.mult(this.acc, deltaTime));
         this.scanEntities(world.entities, deltaTime);
-        // TODO: this.scanTiles(world.tileMap);
+        this.scanTiles(world.tileMap, deltaTime);
         this.checkCollision(deltaTime);
         if (this.collisionStack.length > 0) this.collisionStack = [];
     }
@@ -159,7 +189,8 @@ export default class RectBody extends AABB {
                 side.x = Math.sign(velocity.x);
             }
         }
-        resultTime = Math.floor((resultTime * 1e5)) / 1e5;
+        let significance = 1e5;
+        // resultTime = Math.floor((resultTime * significance)) / significance;
 
         return new Sweep(resultTime, normal, side);
     }
