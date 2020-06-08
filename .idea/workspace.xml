@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/sweeping-aabb-collision.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="202" lean-forward="true" selection-start-line="202" selection-end-line="202" />
+            <state relative-caret-position="316">
+              <caret line="25" column="41" lean-forward="true" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
             </state>
           </provider>
         </entry>
@@ -24,8 +24,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/minkowski.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="436">
-              <caret line="166" column="113" lean-forward="true" selection-start-line="166" selection-start-column="113" selection-end-line="166" selection-end-column="113" />
+            <state relative-caret-position="3984">
+              <caret line="166" column="113" selection-start-line="166" selection-start-column="113" selection-end-line="166" selection-end-column="113" />
             </state>
           </provider>
         </entry>
@@ -47,6 +47,7 @@
       <find>scan</find>
       <find>calls</find>
       <find>eps</find>
+      <find>overlaps</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -142,11 +143,12 @@
       <workItem from="1591305294232" duration="7604000" />
       <workItem from="1591358795548" duration="12210000" />
       <workItem from="1591544741161" duration="9916000" />
+      <workItem from="1591653260406" duration="921000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10199000" />
+    <option name="totallyTimeSpent" value="11120000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -214,17 +216,17 @@
     <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1591447059516" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/minkowski.html">
+    <entry file="file://$PROJECT_DIR$/sweeping-aabb-collision.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="166" column="113" lean-forward="true" selection-start-line="166" selection-start-column="113" selection-end-line="166" selection-end-column="113" />
+        <state relative-caret-position="316">
+          <caret line="25" column="41" lean-forward="true" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sweeping-aabb-collision.html">
+    <entry file="file://$PROJECT_DIR$/minkowski.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="202" lean-forward="true" selection-start-line="202" selection-end-line="202" />
+        <state relative-caret-position="3984">
+          <caret line="166" column="113" selection-start-line="166" selection-start-column="113" selection-end-line="166" selection-end-column="113" />
         </state>
       </provider>
     </entry>
