@@ -302,7 +302,7 @@
             entities.push(
                 new CollidingAABB(
                     createVector(mouseX, mouseY),
-                    createVector(random(32, 16), random(32, 16)),
+                    createVector(random(32, 16) | 0, random(32, 16) | 0),
                 ));
         else if (mouseButton === "right") {
             for (let e of entities) {
