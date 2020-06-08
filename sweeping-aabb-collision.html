@@ -22,8 +22,10 @@
         }
 
         overlaps(aabb) {
-            return (Math.abs(this.center.x - aabb.center.x) * 2 < (this.extents.x + aabb.extents.x) * 2) &&
-                (Math.abs(this.center.y - aabb.center.y) * 2 < (this.extents.y + aabb.extents.y) * 2);
+            return this.left < aabb.right &&
+                this.right > aabb.left &&
+                this.top < aabb.bottom &&
+                this.bottom > aabb.top;
         }
 
         constrainPositionToScreen() {
@@ -121,6 +123,16 @@
             this.updateMovement();
 
             this.constrainPositionToScreen();
+            for (let entity of entities) {
+                if (entity !== this) {
+                    if (this.overlaps(entity)) {
+                        console.log("Me:",this);
+                        console.log("You:",entity);
+                        stopShit(this);
+                    }
+                }
+            }
+            this.sweepChecks = [];
         }
 
         getCollisionBoundary(movement = this.vel) {
@@ -159,6 +171,8 @@
             )*/
         }
 
+        sweepChecks = [];
+
         checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000) {
             let nearest;
             let stack = [];
@@ -180,6 +194,7 @@
             }
 
             if (nearest) {
+                this.sweepChecks.push(nearest);
                 this.center.x += movement.x * nearest.collisionTime * dt;
                 this.center.y += movement.y * nearest.collisionTime * dt;
 
@@ -348,7 +363,7 @@
         if (stopped) {
             fill(255);
             rect(stopped.center.x, stopped.center.y, stopped.extents.x * 2, stopped.extents.y * 2);
-            setTimeout(() => stopped = null, 1000);
+            setTimeout(() => stopped = null, 10e6);
             return;
         }
 
