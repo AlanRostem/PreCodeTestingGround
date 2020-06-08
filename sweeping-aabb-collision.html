@@ -205,8 +205,8 @@
             }
 
             if (nearest) {
-                    this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
-                    this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
+                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
+                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
@@ -219,8 +219,8 @@
                 line(
                     this.center.x,
                     this.center.y,
-                    this.center.x + nearest.normal.x/dotProduct * this.extents.x,
-                    this.center.y + nearest.normal.y/dotProduct * this.extents.y);
+                    this.center.x + nearest.normal.x / dotProduct * this.extents.x,
+                    this.center.y + nearest.normal.y / dotProduct * this.extents.y);
 
                 if (this.collisionStack.length !== 0)
                     this.collisionStack = [];
@@ -272,6 +272,9 @@
                 exitTime.y = deltaExit.y / velocity.y;
             }
 
+            if (entryTime.y > 1) entryTime.y = -Infinity;
+            if (entryTime.x > 1) entryTime.x = -Infinity;
+
             let maxEntryTime = Math.max(entryTime.x, entryTime.y);
             let minExitTime = Math.min(exitTime.x, exitTime.y);
 
@@ -280,8 +283,8 @@
 
             if (!(maxEntryTime > minExitTime ||
                 (entryTime.x < 0 && entryTime.y < 0)
-                || entryTime.x > 1
-                || entryTime.y > 1
+                || (entryTime.x < 0 && (this.right < aabb.left || this.left > aabb.right))
+                || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
             )) {
                 resultTime = maxEntryTime;
                 if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) { // <- HAHAAHAH d låg her xDDDDDD de glømte abs djhdsjkdhjk
