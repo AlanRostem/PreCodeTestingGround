@@ -370,11 +370,6 @@
             this.array = array;
         }
 
-        getTileIdFromVec(vec) {
-            vec = Tile.toTile(vec);
-            return this.array[vec.x + vec.y * this.width];
-        }
-
         getTileId(x, y) {
             return this.array[x + y * this.width];
         }
