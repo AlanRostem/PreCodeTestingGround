@@ -304,7 +304,8 @@
 
     class Player extends CollidingAABB {
         acc = createVector();
-        speed = 200;
+        speed = 250;
+
         update() {
             if (keyIsDown(65)) this.vel.x = -this.speed;
             if (keyIsDown(68)) this.vel.x = this.speed;
@@ -313,7 +314,6 @@
 
             this.checkCollision(this.vel);
             this.updateMovement();
-
             this.vel = createVector();
             this.constrainPositionToScreen();
         }
@@ -322,7 +322,7 @@
     let entities;
     let player;
 
-    addEventListener("contextmenu", e => e.preventDefault());
+    addEventListener("contextmenu", e => e.preventDefault())
 
     function mousePressed() {
         if (mouseButton !== "right" && mouseButton !== "center")
