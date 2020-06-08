@@ -119,8 +119,14 @@
         update() {
             this.checkCollision();
             this.updateMovement();
-
             this.constrainPositionToScreen();
+
+            for (let entity of entities) {
+                if (entity !== this) {
+                    if (this.overlaps(entity))
+                        stopShit(this);
+                }
+            }
         }
 
         getCollisionBoundary(movement = this.vel) {
