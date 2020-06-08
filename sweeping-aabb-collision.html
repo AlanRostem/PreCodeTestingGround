@@ -122,16 +122,14 @@
             this.checkCollision();
             this.updateMovement();
             this.constrainPositionToScreen();
-            for (let entity of entities) {
-                if (entity !== this) {
-                    if (this.overlaps(entity)) {
-                        console.log("Me:",this);
-                        console.log("You:",entity);
+
+            for (let entity of entities){
+                if (entity !== this){
+                    if (this.overlaps(entity)){
                         stopShit(this);
                     }
                 }
             }
-            this.sweepChecks = [];
         }
 
         getCollisionBoundary(movement = this.vel) {
@@ -170,11 +168,11 @@
             )*/
         }
 
-        sweepChecks = [];
 
         checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000) {
-            let nearest;
+            let nearest = this.getSweepObject(this, movement, dt);
             let stack = [];
+            //let colEnt = this;
 
             for (let entity of collisionStack) {
                 if (entity !== this) {
@@ -193,13 +191,29 @@
             }
 
             if (nearest) {
-                this.sweepChecks.push(nearest);
+                if (nearest.collisionTime > remainingTime) nearest.collisionTime = remainingTime;
+
+                /*this.sweepChecks.push({
+                    sweep: nearest,
+                    entity: colEnt,
+                    remainingTime: remainingTime - nearest.collisionTime,
+                    vel: movement
+                });*/
+
                 this.center.x += movement.x * nearest.collisionTime * dt;
                 this.center.y += movement.y * nearest.collisionTime * dt;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
                 nearest.normal.mult(dotProduct);
+
+                /*if (this !== colEnt && this.overlaps(colEnt)) {
+                    console.log("Me:", this);
+                    console.log("You:", colEnt);
+                    entities = [this, colEnt];
+                    stopShit(this);
+                    return;
+                }*/
 
                 if (time > 0 && nearest.normal.magSq() !== 0)
                     this.checkCollision(nearest.normal, time, stack, dt);
@@ -287,6 +301,7 @@
                     }
                 }
             }
+            resultTime = Math.floor((resultTime * 1e5)) / 1e5;
 
             return new Sweep(resultTime, normal);
         }
