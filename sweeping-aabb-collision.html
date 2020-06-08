@@ -158,61 +158,55 @@
             )
         }
 
-        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities) {
-            /*let toIterate = this.collisionStack;
-            if (this.collisionStack.length === 0) toIterate = entities;
-            else this.collisionStack = [];*/
+        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000) {
             let nearest;
             let stack = [];
 
             for (let entity of collisionStack) {
                 if (entity !== this) {
                     if (this.getCollisionBoundary(movement).overlaps(entity)) {
-                        let sweep = this.getSweepObject(entity, movement);
+                        let sweep = this.getSweepObject(entity, movement, dt);
                         stack.push(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
                                 nearest = sweep;
-                                nearest.center = entity.center;
                             }
                         } else {
                             nearest = sweep;
-                            nearest.center = entity.center;
                         }
                     }
                 }
             }
 
             if (nearest) {
-                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;
-                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;
+                this.center.x += movement.x * nearest.collisionTime * dt;
+                this.center.y += movement.y * nearest.collisionTime * dt;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
                 nearest.normal.mult(dotProduct);
 
-                if (time > 0)
-                    this.checkCollision(nearest.normal, time, stack);
+                if (time > 0 && nearest.normal.magSq() !== 0)
+                    this.checkCollision(nearest.normal, time, stack, dt);
 
-                stroke(this.color.levels[0] + 50, this.color.levels[1] + 50, this.color.levels[2] + 50);
-                line(
-                    this.center.x - 5,
-                    this.center.y,
-                    nearest.center.x + 5,
-                    nearest.center.y);
-
-                //this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
-                //this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
+                /*
+                    stroke(this.color.levels[0] + 50, this.color.levels[1] + 50, this.color.levels[2] + 50);
+                        line(
+                            this.center.x - 5,
+                            this.center.y,
+                            entity.center.x + 5,
+                            entity.center.y);
+                 */
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime / 1000))
             }
         }
 
-        getSweepObject(aabb, movement) {
+        getSweepObject(aabb, movement, dt) {
             let deltaEntry = createVector(0, 0);
             let deltaExit = createVector(0, 0);
 
-            let velocity = p5.Vector.mult(movement, deltaTime / 1000);
+            let velocity = p5.Vector.mult(movement, dt);
 
             if (velocity.x > 0) {
                 deltaEntry.x = aabb.left - this.right;
@@ -317,7 +311,7 @@
             entities.push(
                 new CollidingAABB(
                     createVector(mouseX, mouseY),
-                    createVector(random(32, 16) | 0, random(32, 16) | 0),
+                    createVector(random(16, 8) | 0, random(16, 8) | 0),
                 ));
         else if (mouseButton === "right") {
             for (let e of entities) {
@@ -336,6 +330,12 @@
         document.body.appendChild(debugHtml);
     }
 
+    let stopped;
+
+    function stopShit(aabb) {
+        stopped = aabb;
+    }
+
     function draw() {
         debugHtml.innerHTML = "";
         background(0);
@@ -343,6 +343,14 @@
         for (let entity of entities) {
             entity.draw();
         }
+
+        if (stopped) {
+            fill(255);
+            rect(stopped.center.x, stopped.center.y, stopped.extents.x * 2, stopped.extents.y * 2);
+            setTimeout(() => stopped = null, 1000);
+            return;
+        }
+
         for (let entity of entities) {
             entity.update();
         }
