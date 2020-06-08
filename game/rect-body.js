@@ -49,7 +49,7 @@ export default class RectBody extends AABB {
     }
 
     scanTiles(tileMap, deltaTime) {
-        let centralTile = Tile.toTile(this.center);
+        let centralTile = Tile.toTile(this.center); // TODO: scan using CollisionBoundary
         for (let x = -this.tileArea.x + 1; x < this.tileArea.x; x++) {
             for (let y = -this.tileArea.y + 1; y < this.tileArea.y; y++) {
                 let xx = centralTile.x + x;
