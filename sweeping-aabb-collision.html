@@ -107,35 +107,8 @@
         }
     }
 
-    class CollisionStack {
-        static #MAX_LENGTH = 5;
-        #array = [];
-
-        constructor(...args) {
-            this.#array = args;
-        }
-
-        push(sweep) {
-            if (!this.isFull())
-                this.#array.push(sweep);
-        }
-
-        pop() {
-            return this.#array.shift();
-        }
-
-        isFull() {
-            return this.#array.length === CollisionStack.#MAX_LENGTH;
-        }
-
-        isEmpty() {
-            return this.#array.length === 0;
-        }
-    }
 
     class CollidingAABB extends MovingAABB {
-        collisionStack = [];
-
         update() {
             this.boundary = this.getCollisionBoundary();
             this.checkCollision();
