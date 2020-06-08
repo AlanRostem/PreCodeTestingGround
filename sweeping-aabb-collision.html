@@ -304,17 +304,25 @@
 
     class Player extends CollidingAABB {
         acc = createVector();
-
+        speed = 200;
         update() {
+            if (keyIsDown(65)) this.vel.x = -this.speed;
+            if (keyIsDown(68)) this.vel.x = this.speed;
+            if (keyIsDown(87)) this.vel.y = -this.speed;
+            if (keyIsDown(83)) this.vel.y = this.speed;
+
             this.checkCollision(this.vel);
             this.updateMovement();
 
+            this.vel = createVector();
             this.constrainPositionToScreen();
         }
     }
 
     let entities;
     let player;
+
+    addEventListener("contextmenu", e => e.preventDefault());
 
     function mousePressed() {
         if (mouseButton !== "right" && mouseButton !== "center")
@@ -323,6 +331,13 @@
                     createVector(mouseX, mouseY),
                     createVector(random(32, 16), random(32, 16)),
                 ));
+        else if (mouseButton === "right") {
+            for (let e of entities) {
+                let aabb = new AABB(createVector(mouseX, mouseY), createVector(0, 0));
+                if (aabb.overlaps(e)) console.log(e);
+            }
+            return true;
+        }
     }
 
     function setup() {
@@ -341,11 +356,6 @@
         for (let entity of entities) {
             entity.update();
         }
-
-        player.vel = createVector(
-            (mouseX - player.center.x) * 10,
-            (mouseY - player.center.y) * 10,
-        );
     }
 </script>
 </body>
