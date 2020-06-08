@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <title>Swept AABB Collision Detection</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
 </head>
 <body>
 <script>
@@ -90,7 +97,7 @@
 
         updateMovement() {
             this.vel.add(p5.Vector.mult(this.acc, deltaTime / 1000));
-            this.vel = createVector(width/2 - this.center.x, height/2 - this.center.y);
+            this.vel = createVector(width / 2 - this.center.x, height / 2 - this.center.y);
             // this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000));
         }
 
@@ -110,16 +117,15 @@
 
     class CollidingAABB extends MovingAABB {
         update() {
-            this.boundary = this.getCollisionBoundary();
             this.checkCollision();
             this.updateMovement();
 
             this.constrainPositionToScreen();
         }
 
-        getCollisionBoundary() {
+        getCollisionBoundary(movement = this.vel) {
             let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
-            let vel = p5.Vector.mult(this.vel, deltaTime / 1000);
+            let vel = p5.Vector.mult(movement, deltaTime / 1000);
             if (vel.x > 0) {
                 collisionBoundary.extents.x = this.extents.x + vel.x;
                 collisionBoundary.left = this.left;
@@ -161,15 +167,17 @@
 
             for (let entity of collisionStack) {
                 if (entity !== this) {
-                    if (this.getCollisionBoundary().overlaps(entity)) {
+                    if (this.getCollisionBoundary(movement).overlaps(entity)) {
                         let sweep = this.getSweepObject(entity, movement);
                         stack.push(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
                                 nearest = sweep;
+                                nearest.center = entity.center;
                             }
                         } else {
                             nearest = sweep;
+                            nearest.center = entity.center;
                         }
                     }
                 }
@@ -186,12 +194,12 @@
                 if (time > 0)
                     this.checkCollision(nearest.normal, time, stack);
 
-                stroke(255, 0, 0);
+                stroke(this.color.levels[0] + 50, this.color.levels[1] + 50, this.color.levels[2] + 50);
                 line(
-                    this.center.x,
+                    this.center.x - 5,
                     this.center.y,
-                    this.center.x + nearest.normal.x / dotProduct * this.extents.x,
-                    this.center.y + nearest.normal.y / dotProduct * this.extents.y);
+                    nearest.center.x + 5,
+                    nearest.center.y);
 
                 //this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
                 //this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
@@ -292,8 +300,15 @@
         }
     }
 
+    function debug(e) {
+        let p = document.createElement('p');
+        p.innerHTML = e;
+        debugHtml.appendChild(p);
+    }
+
     let entities;
     let player;
+    let debugHtml;
 
     addEventListener("contextmenu", e => e.preventDefault());
 
@@ -315,12 +330,14 @@
 
     function setup() {
         createCanvas(640, 640);
-        document.body.style.margin = 0;
         player = new Player(createVector(320, 320), createVector(16, 16));
         entities = [player];
+        debugHtml = document.createElement("div");
+        document.body.appendChild(debugHtml);
     }
 
     function draw() {
+        debugHtml.innerHTML = "";
         background(0);
         frameRate(144);
         for (let entity of entities) {
