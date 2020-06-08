@@ -100,7 +100,6 @@
         updateMovement() {
             this.vel.add(p5.Vector.mult(this.acc, deltaTime / 1000));
             this.vel = createVector(width / 2 - this.center.x, height / 2 - this.center.y);
-            // this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000));
         }
 
         update() {
@@ -152,30 +151,15 @@
             return collisionBoundary;
         }
 
-        draw() {
-            super.draw();
-            noFill();
-            //stroke(255, 255, 0);
-            noStroke();
-            //strokeWeight(2);
-            let collisionBoundary = this.getCollisionBoundary();
-            /*rect(
-                collisionBoundary.center.x,
-                collisionBoundary.center.y,
-                collisionBoundary.extents.x * 2,
-                collisionBoundary.extents.y * 2,
-            )*/
-        }
 
-
-        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000, count = 0) {
-            let nearest = this.getSweepObject(this, movement, dt);
+        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities) {
+            let nearest;
             let stack = [];
 
             for (let entity of collisionStack) {
                 if (entity !== this) {
                     if (this.getCollisionBoundary(movement).overlaps(entity)) {
-                        let sweep = this.getSweepObject(entity, movement, dt);
+                        let sweep = this.getSweepObject(entity, movement, deltaTime / 1000);
                         stack.push(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
@@ -190,13 +174,6 @@
 
             if (nearest) {
                 if (nearest.collisionTime > remainingTime) nearest.collisionTime = remainingTime;
-
-                /*this.sweepChecks.push({
-                    sweep: nearest,
-                    entity: colEnt,
-                    remainingTime: remainingTime - nearest.collisionTime,
-                    vel: movement
-                });*/
 
                 this.center.x += movement.x * nearest.collisionTime * dt - Math.sign(movement.x) * eps;
                 this.center.y += movement.y * nearest.collisionTime * dt - Math.sign(movement.y) * eps;
@@ -286,7 +263,7 @@
                 || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
             )) {
                 resultTime = maxEntryTime;
-                if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) { // <- HAHAAHAH d låg her xDDDDDD de glømte abs djhdsjkdhjk
+                if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) {
                     if (deltaEntry.x < 0) {
                         normal = createVector(1, 0);
                     } else {
@@ -322,15 +299,8 @@
         }
     }
 
-    function debug(e) {
-        let p = document.createElement('p');
-        p.innerHTML = e;
-        debugHtml.appendChild(p);
-    }
-
     let entities;
     let player;
-    let debugHtml;
 
     addEventListener("contextmenu", e => e.preventDefault());
 
@@ -356,8 +326,6 @@
         createCanvas(640, 640);
         player = new Player(createVector(320, 320), createVector(16, 16));
         entities = [player];
-        debugHtml = document.createElement("div");
-        document.body.appendChild(debugHtml);
     }
 
     let stopped;
@@ -367,7 +335,6 @@
     }
 
     function draw() {
-        debugHtml.innerHTML = "";
         background(0);
         frameRate(144);
         for (let entity of entities) {
