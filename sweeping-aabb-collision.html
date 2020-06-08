@@ -121,7 +121,6 @@
         update() {
             this.checkCollision();
             this.updateMovement();
-
             this.constrainPositionToScreen();
             for (let entity of entities) {
                 if (entity !== this) {
