@@ -14,6 +14,7 @@
 </head>
 <body>
 <script>
+
     class AABB {
         constructor(center, extents) {
             this.center = center;
@@ -122,14 +123,6 @@
             this.checkCollision();
             this.updateMovement();
             this.constrainPositionToScreen();
-
-            for (let entity of entities){
-                if (entity !== this){
-                    if (this.overlaps(entity)){
-                        stopShit(this);
-                    }
-                }
-            }
         }
 
         getCollisionBoundary(movement = this.vel) {
@@ -169,10 +162,9 @@
         }
 
 
-        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000) {
+        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, dt = deltaTime / 1000, count = 0) {
             let nearest = this.getSweepObject(this, movement, dt);
             let stack = [];
-            //let colEnt = this;
 
             for (let entity of collisionStack) {
                 if (entity !== this) {
@@ -215,9 +207,10 @@
                     return;
                 }*/
 
-                if (time > 0 && nearest.normal.magSq() !== 0)
-                    this.checkCollision(nearest.normal, time, stack, dt);
+                if (time > 0 && count < 5)
+                    this.checkCollision(nearest.normal, time, stack, dt, count + 1);
 
+                if (count >= 5) console.log(nearest);
                 /*
                     stroke(this.color.levels[0] + 50, this.color.levels[1] + 50, this.color.levels[2] + 50);
                         line(
