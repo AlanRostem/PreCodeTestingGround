@@ -14,7 +14,6 @@
 </head>
 <body>
 <script>
-
     class AABB {
         constructor(center, extents) {
             this.center = center;
@@ -123,6 +122,13 @@
             this.checkCollision();
             this.updateMovement();
             this.constrainPositionToScreen();
+
+            for (let entity of entities){
+                if (entity !== this){
+                    if (this.overlaps(entity))
+                        stopShit(this);
+                }
+            }
         }
 
         getCollisionBoundary(movement = this.vel) {
@@ -192,8 +198,8 @@
                     vel: movement
                 });*/
 
-                this.center.x += movement.x * nearest.collisionTime * dt;
-                this.center.y += movement.y * nearest.collisionTime * dt;
+                this.center.x += movement.x * nearest.collisionTime * dt - Math.sign(movement.x) * eps;
+                this.center.y += movement.y * nearest.collisionTime * dt - Math.sign(movement.y) * eps;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
@@ -294,8 +300,7 @@
                     }
                 }
             }
-            resultTime = Math.floor((resultTime * 1e5)) / 1e5;
-
+            //resultTime = Math.floor((resultTime / eps)) * eps;
             return new Sweep(resultTime, normal);
         }
     }
@@ -344,6 +349,8 @@
             return true;
         }
     }
+
+    const eps = 1e-5;
 
     function setup() {
         createCanvas(640, 640);
