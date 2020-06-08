@@ -15,6 +15,7 @@
 <body>
 <script>
     class AABB {
+        static EPSILON = 1e-5;
         constructor(center, extents) {
             this.center = center;
             this.extents = extents;
@@ -22,6 +23,7 @@
         }
 
         overlaps(aabb) {
+
             return this.left < aabb.right &&
                 this.right > aabb.left &&
                 this.top < aabb.bottom &&
@@ -47,35 +49,35 @@
         }
 
         get top() {
-            return this.center.y - this.extents.y;
+            return this.center.y - this.extents.y + AABB.EPSILON;
         }
 
         set top(y) {
-            this.center.y = y + this.extents.y;
+            this.center.y = y + this.extents.y - AABB.EPSILON;
         }
 
         get bottom() {
-            return this.center.y + this.extents.y;
+            return this.center.y + this.extents.y - AABB.EPSILON;
         }
 
         set bottom(y) {
-            this.center.y = y - this.extents.y;
+            this.center.y = y - this.extents.y + AABB.EPSILON;
         }
 
         get left() {
-            return this.center.x - this.extents.x;
+            return this.center.x - this.extents.x + AABB.EPSILON;
         }
 
         set left(x) {
-            this.center.x = x + this.extents.x;
+            this.center.x = x + this.extents.x - AABB.EPSILON;
         }
 
         get right() {
-            return this.center.x + this.extents.x;
+            return this.center.x + this.extents.x - AABB.EPSILON;
         }
 
         set right(x) {
-            this.center.x = x - this.extents.x;
+            this.center.x = x - this.extents.x + AABB.EPSILON;
         }
 
         update() {
@@ -120,12 +122,11 @@
         update() {
             this.checkCollision();
             this.updateMovement();
-            this.constrainPositionToScreen();
 
-            for (let entity of entities) {
-                if (entity !== this) {
-                    if (this.overlaps(entity))
-                        stopShit(this);
+            for (let entity of entities){
+                if (entity !== this){
+                    if (this.overlaps(entity));
+                        //stopShit(this);
                 }
             }
         }
@@ -152,7 +153,7 @@
         }
 
 
-        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities) {
+        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities, count = 0) {
             let nearest;
             let stack = [];
 
@@ -175,15 +176,17 @@
             if (nearest) {
                 if (nearest.collisionTime > remainingTime) nearest.collisionTime = remainingTime;
 
-                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;// - Math.sign(movement.x) * eps;
-                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;// - Math.sign(movement.y) * eps;
+                this.center.x += movement.x * nearest.collisionTime * deltaTime/1000;// - Math.sign(movement.x) * eps;
+                this.center.y += movement.y * nearest.collisionTime * deltaTime/1000;// - Math.sign(movement.y) * eps;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
                 nearest.normal.mult(dotProduct);
 
-                if (time > 0)
-                    this.checkCollision(nearest.normal, time, stack);
+                this.constrainPositionToScreen();
+
+                if (time > 0 && count < 5)
+                    this.checkCollision(nearest.normal, time, stack, count + 1);
 
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime / 1000))
@@ -260,7 +263,8 @@
                     }
                 }
             }
-            //resultTime = Math.floor((resultTime / eps)) * eps;
+            resultTime = Math.floor((resultTime / AABB.EPSILON)) * AABB.EPSILON;
+
             return new Sweep(resultTime, normal);
         }
     }
@@ -302,8 +306,6 @@
             return true;
         }
     }
-
-    const eps = 1e-5;
 
     function setup() {
         createCanvas(640, 640);
