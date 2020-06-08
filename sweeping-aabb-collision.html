@@ -14,6 +14,7 @@
 </head>
 <body>
 <script>
+
     class AABB {
         constructor(center, extents) {
             this.center = center;
@@ -121,14 +122,6 @@
             this.checkCollision();
             this.updateMovement();
             this.constrainPositionToScreen();
-
-            for (let entity of entities) {
-                if (entity !== this) {
-                    if (this.overlaps(entity)) {
-                        stopShit(this);
-                    }
-                }
-            }
         }
 
         getCollisionBoundary(movement = this.vel) {
@@ -183,8 +176,26 @@
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
                 nearest.normal.mult(dotProduct);
 
-                if (time > 0)
-                    this.checkCollision(nearest.normal, time, stack);
+                /*if (this !== colEnt && this.overlaps(colEnt)) {
+                    console.log("Me:", this);
+                    console.log("You:", colEnt);
+                    entities = [this, colEnt];
+                    stopShit(this);
+                    return;
+                }*/
+
+                if (time > 0 && count < 5)
+                    this.checkCollision(nearest.normal, time, stack, dt, count + 1);
+
+                if (count >= 5) console.log(nearest);
+                /*
+                    stroke(this.color.levels[0] + 50, this.color.levels[1] + 50, this.color.levels[2] + 50);
+                        line(
+                            this.center.x - 5,
+                            this.center.y,
+                            entity.center.x + 5,
+                            entity.center.y);
+                 */
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime / 1000))
             }
