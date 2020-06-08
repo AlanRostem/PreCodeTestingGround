@@ -17,18 +17,22 @@ export default class World {
             let aabb = e.body;
             if (aabb.top < 0) {
                 aabb.top = 0;
+                e.onTopCollision(null);
             }
 
             if (aabb.bottom > height) {
                 aabb.bottom = height;
+                e.onBottomCollision(null);
             }
 
             if (aabb.left < 0) {
                 aabb.left = 0;
+                e.onLeftCollision(null);
             }
 
             if (aabb.right > width) {
                 aabb.right = width;
+                e.onRightCollision(null);
             }
         }
     }

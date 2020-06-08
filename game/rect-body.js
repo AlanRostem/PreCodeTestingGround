@@ -29,9 +29,9 @@ export default class RectBody extends AABB {
 
     scanEntities(entities, deltaTime) {
         for (let entity of entities) {
-            if (entity !== this) {
-                if (this.getCollisionBoundary(deltaTime).overlaps(entity)) {
-                    this.collisionStack.push(entity);
+            if (entity.body !== this) {
+                if (this.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
+                    this.collisionStack.push(entity.body);
                 }
             }
         }
@@ -42,40 +42,43 @@ export default class RectBody extends AABB {
         this.scanEntities(world.entities, deltaTime);
         // TODO: this.scanTiles(world.tileMap);
         this.checkCollision(deltaTime);
+        if (this.collisionStack.length > 0) this.collisionStack = [];
     }
 
     checkCollision(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        let potential;
+        let hit;
         let stack = [];
 
         for (let entity of collisionStack) {
             if (entity !== this) {
-                if (this.getCollisionBoundary(movement).overlaps(entity)) {
-                    let sweep = this.getSweepObject(entity, movement, deltaTime / 1000);
+                if (this.getCollisionBoundary(deltaTime, movement).overlaps(entity)) {
+                    let sweep = this.getSweepObject(entity, movement, deltaTime);
                     stack.push(entity);
-                    if (potential) {
-                        if (sweep.collisionTime < potential.collisionTime) {
-                            potential = sweep;
+                    if (hit) {
+                        if (sweep.collisionTime < hit.collisionTime) {
+                            hit = sweep;
                         }
                     } else {
-                        potential = sweep;
+                        hit = sweep;
                     }
                 }
             }
         }
 
-        if (potential) {
-            if (potential.collisionTime > remainingTime) potential.collisionTime = remainingTime;
+        if (hit) {
+            if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
-            this.center.x += movement.x * potential.collisionTime * deltaTime;
-            this.center.y += movement.y * potential.collisionTime * deltaTime;
+            this.center.x += movement.x * hit.collisionTime * deltaTime;
+            this.center.y += movement.y * hit.collisionTime * deltaTime;
 
-            let time = remainingTime - potential.collisionTime;
-            let dotProduct = p5.Vector.dot(movement, potential.normal) * time;
-            potential.normal.mult(dotProduct);
+            let time = remainingTime - hit.collisionTime;
+            let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
+            hit.normal.mult(dotProduct);
+
+            this.onCollision(hit.side);
 
             if (time > 0 && count < 5)
-                this.checkCollision(potential.normal, time, stack, deltaTime, count + 1);
+                this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
         } else {
             this.center.add(p5.Vector.mult(movement, deltaTime))
         }
@@ -130,6 +133,7 @@ export default class RectBody extends AABB {
 
         let resultTime = 1;
         let normal = createVector();
+        let side = createVector();
 
         if (!(maxEntryTime > minExitTime ||
             (entryTime.x < 0 && entryTime.y < 0)
@@ -143,16 +147,24 @@ export default class RectBody extends AABB {
                 } else {
                     normal = createVector(-1, 0);
                 }
+
+                side.y = Math.sign(velocity.y);
             } else {
                 if (deltaEntry.y < 0) {
                     normal = createVector(0, 1);
                 } else {
                     normal = createVector(0, -1);
                 }
+
+                side.x = Math.sign(velocity.x);
             }
         }
         resultTime = Math.floor((resultTime * 1e5)) / 1e5;
 
-        return new Sweep(resultTime, normal);
+        return new Sweep(resultTime, normal, side);
+    }
+
+    onCollision(side) {
+
     }
 };

@@ -1,9 +1,48 @@
 import RectBody from "./rect-body.js";
 
+class EntityBody extends RectBody {
+    constructor(entity, center, extents) {
+        super(center, extents);
+        this.entity = entity;
+    }
+
+    onCollision(side) {
+        if (side.y > 0) {
+            this.entity.onBottomCollision();
+        } else if (side.y < 0) {
+            this.entity.onTopCollision();
+        }
+
+        if (side.x < 0) {
+            this.entity.onLeftCollision();
+        } else if (side.x > 0) {
+            this.entity.onRightCollision();
+        }
+    }
+}
+
 export default class Entity {
-    constructor(body = new RectBody(createVector(width/2, height * .75), createVector(16, 16))) {
+
+
+    constructor(body = new EntityBody(this, createVector(width/2, height * .75), createVector(16, 16))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
+    }
+
+    onTopCollision() {
+
+    }
+
+    onBottomCollision() {
+
+    }
+
+    onLeftCollision() {
+
+    }
+
+    onRightCollision() {
+
     }
 
     update(world, deltaTime) {
