@@ -84,7 +84,7 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            let tall = 50;
+            let tall = 0;
             this.vel = createVector(random(-tall, tall), random(-tall, tall));
             this.acc = createVector(0, 0);
         }
@@ -184,8 +184,9 @@
             let toIterate = this.collisionStack;
             if (this.collisionStack.length === 0) toIterate = entities;
             else this.collisionStack = [];
-            toIterate = entities;
             let nearest;
+
+            console.log(toIterate.length);
 
             for (let entity of toIterate) {
                 if (entity !== this) {
@@ -221,6 +222,8 @@
                     this.center.x + nearest.normal.x/dotProduct * this.extents.x,
                     this.center.y + nearest.normal.y/dotProduct * this.extents.y);
 
+                if (this.collisionStack.length !== 0)
+                    this.collisionStack = [];
                 //this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
                 //this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
             } else {
