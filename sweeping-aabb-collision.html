@@ -84,13 +84,13 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            let tall = 0;
-            this.vel = createVector(random(-tall, tall), random(-tall, tall));
+            this.vel = createVector(0, 0);
             this.acc = createVector(0, 0);
         }
 
         updateMovement() {
             this.vel.add(p5.Vector.mult(this.acc, deltaTime / 1000));
+            this.vel = createVector(width/2 - this.center.x, height/2 - this.center.y);
             // this.center.add(p5.Vector.mult(this.vel, deltaTime / 1000));
         }
 
@@ -295,7 +295,7 @@
     let entities;
     let player;
 
-    addEventListener("contextmenu", e => e.preventDefault())
+    addEventListener("contextmenu", e => e.preventDefault());
 
     function mousePressed() {
         if (mouseButton !== "right" && mouseButton !== "center")
