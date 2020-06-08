@@ -84,7 +84,7 @@
     class MovingAABB extends AABB {
         constructor(center, extents) {
             super(center, extents);
-            let tall = 0;
+            let tall = 50;
             this.vel = createVector(random(-tall, tall), random(-tall, tall));
             this.acc = createVector(0, 0);
         }
@@ -138,11 +138,10 @@
 
         update() {
             this.boundary = this.getCollisionBoundary();
-            this.checkCollision(this.vel);
+            this.checkCollision();
             this.updateMovement();
 
             this.constrainPositionToScreen();
-            this.collisionStack = [];
         }
 
         getCollisionBoundary() {
@@ -180,19 +179,18 @@
             )
         }
 
-        checkCollision(movement, remainingTime = 1, count = 0) {
-            let toIterate = this.collisionStack;
+        checkCollision(movement = this.vel, remainingTime = 1, collisionStack = entities) {
+            /*let toIterate = this.collisionStack;
             if (this.collisionStack.length === 0) toIterate = entities;
-            else this.collisionStack = [];
+            else this.collisionStack = [];*/
             let nearest;
+            let stack = [];
 
-            console.log(toIterate.length);
-
-            for (let entity of toIterate) {
+            for (let entity of collisionStack) {
                 if (entity !== this) {
                     if (this.getCollisionBoundary().overlaps(entity)) {
                         let sweep = this.getSweepObject(entity, movement);
-                        this.collisionStack.push(entity);
+                        stack.push(entity);
                         if (nearest) {
                             if (sweep.collisionTime < nearest.collisionTime) {
                                 nearest = sweep;
@@ -213,7 +211,7 @@
                 nearest.normal.mult(dotProduct);
 
                 if (time > 0)
-                    this.checkCollision(nearest.normal, time, count + 1);
+                    this.checkCollision(nearest.normal, time, stack);
 
                 stroke(255, 0, 0);
                 line(
@@ -222,8 +220,6 @@
                     this.center.x + nearest.normal.x / dotProduct * this.extents.x,
                     this.center.y + nearest.normal.y / dotProduct * this.extents.y);
 
-                if (this.collisionStack.length !== 0)
-                    this.collisionStack = [];
                 //this.center.x += nearest.normal.x * dotProduct * deltaTime / 1000;
                 //this.center.y += nearest.normal.y * dotProduct * deltaTime / 1000;
             } else {
