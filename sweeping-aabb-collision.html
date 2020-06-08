@@ -180,7 +180,7 @@
             )
         }
 
-        checkCollision(movement, remainingTime = 1, count = 0) {
+        checkCollision(movement, remainingTime = 1) {
             let toIterate = this.collisionStack;
             if (this.collisionStack.length === 0) toIterate = entities;
             else this.collisionStack = [];
@@ -213,7 +213,7 @@
                 nearest.normal.mult(dotProduct);
 
                 if (time > 0)
-                    this.checkCollision(nearest.normal, time, count + 1);
+                    this.checkCollision(nearest.normal, time);
 
                 stroke(255, 0, 0);
                 line(
