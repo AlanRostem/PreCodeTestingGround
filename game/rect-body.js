@@ -1,6 +1,7 @@
 import AABB from "./aabb.js"
 import Sweep from "./sweep.js"
 import Tile from "./tile.js"
+const EPSILON = 1e-5;
 
 export default class RectBody extends AABB {
     vel = createVector();
@@ -98,8 +99,8 @@ export default class RectBody extends AABB {
         if (hit) {
             if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
-            this.center.x += movement.x * hit.collisionTime * deltaTime;
-            this.center.y += movement.y * hit.collisionTime * deltaTime;
+            this.center.x += movement.x * hit.collisionTime * deltaTime - Math.sign(movement.x) * EPSILON;
+            this.center.y += movement.y * hit.collisionTime * deltaTime - Math.sign(movement.y) * EPSILON;
 
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
@@ -189,8 +190,6 @@ export default class RectBody extends AABB {
                 side.x = Math.sign(velocity.x);
             }
         }
-        let significance = 1e5;
-        // resultTime = Math.floor((resultTime * significance)) / significance;
 
         return new Sweep(resultTime, normal, side);
     }

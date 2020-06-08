@@ -7,6 +7,7 @@ export default class Player extends Entity {
     constructor() {
         super();
         this.body.acc.y = 2000;
+        this.body.extents = createVector(16, 16);
     }
 
     controls() {
@@ -26,6 +27,10 @@ export default class Player extends Entity {
 
     onRightCollision() {
         this.body.vel.x = 0;
+    }
+
+    onTopCollision() {
+        // this.body.vel.y = 0;
     }
 
     onBottomCollision() {

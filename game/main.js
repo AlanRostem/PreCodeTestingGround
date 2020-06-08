@@ -4,7 +4,6 @@ import Entity from "./entity.js"
 import Player from "./player.js"
 
 let world;
-
 window.setup = () => {
     createCanvas(640, 640);
     world = new World;
