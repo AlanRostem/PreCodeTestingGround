@@ -110,10 +110,5 @@ export default class RectBody extends AABB {
 
     update(world, deltaTime) {
         this.vel.add(p5.Vector.mult(this.acc, deltaTime));
-
-    }
-
-    onCollision(side) {
-
     }
 };

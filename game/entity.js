@@ -1,49 +1,26 @@
 import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
 
-class EntityBody extends RectBody {
-    constructor(entity, center, extents) {
-        super(center, extents);
-        this.entity = entity;
-    }
-
-    onCollision(side) {
-        if (side.y > 0) {
-            this.entity.onBottomCollision();
-        } else if (side.y < 0) {
-            this.entity.onTopCollision();
-        }
-
-        if (side.x < 0) {
-            this.entity.onLeftCollision();
-        } else if (side.x > 0) {
-            this.entity.onRightCollision();
-        }
-    }
-}
-
 export default class Entity {
-
-
-    constructor(body = new EntityBody(this, createVector(width/2, height * .75), createVector(16, 16))) {
+    constructor(body = new RectBody(createVector(width/2, height * .75), createVector(16, 16))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
     }
 
-    onTopCollision() {
+    onTopCollision(entity) {
 
     }
 
-    onBottomCollision() {
+    onBottomCollision(entity) {
 
     }
 
-    onLeftCollision() {
+    onLeftCollision(entity) {
 
     }
 
-    onRightCollision() {
+    onRightCollision(entity) {
 
     }
 
@@ -87,11 +64,11 @@ export default class Entity {
         let hit;
         let stack = [];
 
-        for (let entity of collisionStack) {
-            if (entity !== this) {
-                if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(entity)) {
-                    let sweep = this.body.getSweepObject(entity, movement, deltaTime);
-                    stack.push(entity);
+        for (let aabb of collisionStack) {
+            if (aabb !== this) {
+                if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(aabb)) {
+                    let sweep = this.body.getSweepObject(aabb, movement, deltaTime);
+                    stack.push(aabb);
                     if (hit) {
                         if (sweep.collisionTime < hit.collisionTime) {
                             hit = sweep;
@@ -113,7 +90,7 @@ export default class Entity {
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
 
-            this.body.onCollision(hit.side);
+            this.onCollision(hit.side);
 
             if (time > 0 && count < 5)
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
@@ -128,6 +105,21 @@ export default class Entity {
         this.scanTiles(world.tileMap, deltaTime);
         this.checkCollision(deltaTime);
         if (this.collisionStack.length > 0) this.collisionStack = [];
+    }
+
+    onCollision(side) {
+        let entity = null;
+        if (side.y > 0) {
+            this.onBottomCollision(entity);
+        } else if (side.y < 0) {
+            this.onTopCollision(entity);
+        }
+
+        if (side.x < 0) {
+            this.onLeftCollision(entity);
+        } else if (side.x > 0) {
+            this.onRightCollision(entity);
+        }
     }
 
     draw() {
