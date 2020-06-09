@@ -65,6 +65,7 @@ export default class Entity {
         if (tileX === 1) tileX++;
         if (tileY === 1) tileY++;
         let tileArea = createVector(tileX, tileY);
+        let bounds = this.body.getCollisionBoundary(deltaTime);
         for (let x = -tileArea.x + 1; x < tileArea.x; x++) {
             for (let y = -tileArea.y + 1; y < tileArea.y; y++) {
                 let xx = centralTile.x + x;
@@ -74,7 +75,7 @@ export default class Entity {
                     xx < 0 || xx >= tileMap.width ||
                     yy < 0 || yy >= tileMap.height ||
                     tileMap.getTileId(xx, yy) === 0 ||
-                    !this.body.getCollisionBoundary(deltaTime).overlaps(tile)
+                    !bounds.overlaps(tile)
                 ) continue;
 
                 this.collisionStack.push(tile);
