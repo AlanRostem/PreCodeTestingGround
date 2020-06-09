@@ -31,7 +31,6 @@ window.mousePressed = () => {
 
 window.draw = () => {
     world.update(deltaTime / 1000);
-    console.log(player.body);
 
     let scaleFactor = 2;
     translate((-player.body.center.x * scaleFactor + width / 2), (-player.body.center.y * scaleFactor + height / 2));
