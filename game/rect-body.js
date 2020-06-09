@@ -5,17 +5,6 @@ import Tile from "./tile.js"
 export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
-    collisionStack = [];
-
-    constructor(c, e) {
-        super(c, e);
-        const proxy = 1;
-        let tileX = Math.round(this.extents.x * 2 / Tile.SIZE + proxy);
-        let tileY = Math.round(this.extents.y * 2 / Tile.SIZE + proxy);
-        if (tileX === 1) tileX++;
-        if (tileY === 1) tileY++;
-        this.tileArea = createVector(tileX, tileY);
-    }
 
     getCollisionBoundary(deltaTime, movement = this.vel) {
         let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
@@ -36,82 +25,6 @@ export default class RectBody extends AABB {
             collisionBoundary.bottom = this.bottom;
         }
         return collisionBoundary;
-    }
-
-    scanEntities(entities, deltaTime) {
-        for (let entity of entities) {
-            if (entity.body !== this) {
-                if (this.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
-                    this.collisionStack.push(entity.body);
-                }
-            }
-        }
-    }
-
-    scanTiles(tileMap, deltaTime) {
-        let centralTile = Tile.toTile(this.center); // TODO: scan using CollisionBoundary
-        for (let x = -this.tileArea.x + 1; x < this.tileArea.x; x++) {
-            for (let y = -this.tileArea.y + 1; y < this.tileArea.y; y++) {
-                let xx = centralTile.x + x;
-                let yy = centralTile.y + y;
-                let tile = new Tile(xx, yy).toAABB();
-                if (
-                    xx < 0 || xx >= tileMap.width ||
-                    yy < 0 || yy >= tileMap.height ||
-                    tileMap.getTileId(xx, yy) === 0 ||
-                    !this.getCollisionBoundary(deltaTime).overlaps(tile)
-                ) continue;
-
-                this.collisionStack.push(tile);
-            }
-        }
-    }
-
-    update(world, deltaTime) {
-        this.vel.add(p5.Vector.mult(this.acc, deltaTime));
-        this.scanEntities(world.entities, deltaTime);
-        this.scanTiles(world.tileMap, deltaTime);
-        this.checkCollision(deltaTime);
-        if (this.collisionStack.length > 0) this.collisionStack = [];
-    }
-
-    checkCollision(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        let hit;
-        let stack = [];
-
-        for (let entity of collisionStack) {
-            if (entity !== this) {
-                if (this.getCollisionBoundary(deltaTime, movement).overlaps(entity)) {
-                    let sweep = this.getSweepObject(entity, movement, deltaTime);
-                    stack.push(entity);
-                    if (hit) {
-                        if (sweep.collisionTime < hit.collisionTime) {
-                            hit = sweep;
-                        }
-                    } else {
-                        hit = sweep;
-                    }
-                }
-            }
-        }
-
-        if (hit) {
-            if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
-
-            this.center.x += movement.x * hit.collisionTime * deltaTime; // - Math.sign(movement.x) * EPSILON;
-            this.center.y += movement.y * hit.collisionTime * deltaTime; // - Math.sign(movement.y) * EPSILON;
-
-            let time = remainingTime - hit.collisionTime;
-            let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
-            hit.normal.mult(dotProduct);
-
-            this.onCollision(hit.side);
-
-            if (time > 0 && count < 5)
-                this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
-        } else {
-            this.center.add(p5.Vector.mult(movement, deltaTime))
-        }
     }
 
     getSweepObject(aabb, movement, deltaTime) {
@@ -193,6 +106,11 @@ export default class RectBody extends AABB {
         resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
         return new Sweep(resultTime, normal, side);
+    }
+
+    update(world, deltaTime) {
+        this.vel.add(p5.Vector.mult(this.acc, deltaTime));
+
     }
 
     onCollision(side) {
