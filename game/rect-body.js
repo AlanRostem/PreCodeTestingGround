@@ -83,7 +83,7 @@ export default class RectBody extends AABB {
             || (entryTime.x < 0 && (this.right < aabb.left || this.left > aabb.right))
             || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
         )) {
-            resultTime = maxEntryTime;
+            resultTime = maxEntryTime - AABB.EPSILON;
             if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) {
                 if (deltaEntry.x < 0) {
                     normal = createVector(1, 0);
@@ -102,8 +102,6 @@ export default class RectBody extends AABB {
                 side.x = Math.sign(velocity.x);
             }
         }
-
-        resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
         return new Sweep(resultTime, normal, side);
     }

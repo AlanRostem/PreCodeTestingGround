@@ -13,34 +13,34 @@ export default class AABB {
     }
 
     get top() {
-        return this.center.y - this.extents.y + AABB.EPSILON;
+        return this.center.y - this.extents.y;
     }
 
     set top(y) {
-        this.center.y = y + this.extents.y - AABB.EPSILON;
+        this.center.y = y + this.extents.y;
     }
 
     get bottom() {
-        return this.center.y + this.extents.y - AABB.EPSILON;
+        return this.center.y + this.extents.y;
     }
 
     set bottom(y) {
-        this.center.y = y - this.extents.y + AABB.EPSILON;
+        this.center.y = y - this.extents.y;
     }
 
     get left() {
-        return this.center.x - this.extents.x + AABB.EPSILON;
+        return this.center.x - this.extents.x;
     }
 
     set left(x) {
-        this.center.x = x + this.extents.x - AABB.EPSILON;
+        this.center.x = x + this.extents.x;
     }
 
     get right() {
-        return this.center.x + this.extents.x - AABB.EPSILON;
+        return this.center.x + this.extents.x;
     }
 
     set right(x) {
-        this.center.x = x - this.extents.x + AABB.EPSILON;
+        this.center.x = x - this.extents.x;
     }
 }
