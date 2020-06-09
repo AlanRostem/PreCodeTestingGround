@@ -1,6 +1,5 @@
 import AABB from "./aabb.js"
 import Sweep from "./sweep.js"
-import Tile from "./tile.js"
 
 export default class RectBody extends AABB {
     vel = createVector();
@@ -83,7 +82,7 @@ export default class RectBody extends AABB {
             || (entryTime.x < 0 && (this.right < aabb.left || this.left > aabb.right))
             || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
         )) {
-            resultTime = maxEntryTime - AABB.EPSILON;
+            resultTime = maxEntryTime;
             if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) {
                 if (deltaEntry.x < 0) {
                     normal = createVector(1, 0);

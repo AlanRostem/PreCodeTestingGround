@@ -1,13 +1,13 @@
 import Entity from "./entity.js"
+import Tile from "./tile.js"
 
 export default class Player extends Entity {
-    walkSpeed = 200;
-    jumpSpeed = 500;
+    walkSpeed = Tile.SIZE * 5;
+    jumpSpeed = Tile.SIZE * 10;
 
     constructor() {
         super();
-        this.body.acc.y = 2000;
-        this.body.extents = createVector(16, 16);
+        this.body.acc.y = Tile.SIZE * 40;
     }
 
     controls() {
@@ -22,11 +22,11 @@ export default class Player extends Entity {
     }
 
     onLeftCollision() {
-        this.body.vel.x = 0;
+
     }
 
     onRightCollision() {
-        this.body.vel.x = 0;
+
     }
 
     onTopCollision() {
@@ -35,7 +35,7 @@ export default class Player extends Entity {
 
     onBottomCollision() {
         this.jumping = false;
-        this.body.vel.x = 0;
+        //this.body.vel.x = 0;
         this.body.vel.y = 0;
     }
 

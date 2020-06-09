@@ -2,7 +2,7 @@ import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
 
 export default class Entity {
-    constructor(body = new RectBody(createVector(width/2, height * .75), createVector(16, 16))) {
+    constructor(body = new RectBody(createVector(Tile.SIZE * 10, Tile.SIZE * 15), createVector(Tile.SIZE/2, Tile.SIZE/2))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];

@@ -1,7 +1,7 @@
 import AABB from "./aabb.js"
 
 export default class Tile {
-    static SIZE = 32;
+    static SIZE = 16;
     x = 0;
     y = 0;
     id = -1;
