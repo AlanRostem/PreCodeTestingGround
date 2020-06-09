@@ -58,14 +58,14 @@ export default class Entity {
     }
 
     scanTiles(tileMap, deltaTime) {
-        let centralTile = Tile.toTile(this.body.center);
+        let bounds = this.body.getCollisionBoundary(deltaTime);
+        let centralTile = Tile.toTile(bounds.center);
         const proxy = 1;
-        let tileX = Math.round(this.body.extents.x * 2 / Tile.SIZE + proxy);
-        let tileY = Math.round(this.body.extents.y * 2 / Tile.SIZE + proxy);
+        let tileX = Math.round(bounds.extents.x * 2 / Tile.SIZE + proxy);
+        let tileY = Math.round(bounds.extents.y * 2 / Tile.SIZE + proxy);
         if (tileX === 1) tileX++;
         if (tileY === 1) tileY++;
         let tileArea = createVector(tileX, tileY);
-        let bounds = this.body.getCollisionBoundary(deltaTime);
         for (let x = -tileArea.x + 1; x < tileArea.x; x++) {
             for (let y = -tileArea.y + 1; y < tileArea.y; y++) {
                 let xx = centralTile.x + x;
