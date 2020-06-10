@@ -26,7 +26,7 @@ export default class Entity {
 
     scanEntities(entities, deltaTime) {
         for (let entity of entities) {
-            if (entity.body !== this) {
+            if (entity !== this) {
                 if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
                     this.collisionStack.push(entity.body);
                 }
@@ -69,6 +69,7 @@ export default class Entity {
                 if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(aabb)) {
                     let sweep = this.body.getSweepObject(aabb, movement, deltaTime);
                     stack.push(aabb);
+                    sweep.center = aabb.center;
                     if (hit) {
                         if (sweep.collisionTime < hit.collisionTime) {
                             hit = sweep;
@@ -91,6 +92,13 @@ export default class Entity {
             hit.normal.mult(dotProduct);
 
             this.onCollision(hit.side);
+
+            stroke(255);
+            strokeWeight(1);
+            line(
+                this.body.center.x, this.body.center.y,
+                hit.center.x, hit.center.y,
+            );
 
             if (time > 0 && count < 5)
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
