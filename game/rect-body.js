@@ -98,7 +98,6 @@ export default class RectBody extends AABB {
                 } else {
                     normal = createVector(0, -1);
                 }
-                resultTime = maxEntryTime;
                 side.x = Math.sign(velocity.x);
             } /*else {
                 // Equilibrium in axis collision
@@ -111,7 +110,7 @@ export default class RectBody extends AABB {
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(aabb, resultTime, normal, side, Math.abs(this.center.magSq() - aabb.center.magSq()));
+        return new Sweep(aabb, resultTime, normal, side);
     }
 
     update(world, deltaTime) {

@@ -30,7 +30,7 @@ export default class Player extends Entity {
     }
 
     onTopCollision() {
-        this.body.vel.y *= 0;
+        this.body.vel.y = 0;
     }
 
     onBottomCollision() {
