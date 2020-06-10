@@ -140,7 +140,12 @@ export default class Entity {
     }
 
     draw() {
+        let e = this.body.getCollisionBoundary(deltaTime/1000);
+        noFill();
+        stroke(255, 255, 0);
+        rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
         rectMode(CENTER);
+        noStroke();
         fill(this.color);
         rect(this.body.center.x, this.body.center.y, this.body.extents.x * 2, this.body.extents.y * 2);
     }
