@@ -91,7 +91,7 @@ export default class RectBody extends AABB {
                 }
 
                 side.y = Math.sign(velocity.y);
-            } else {
+            } else if (Math.abs(deltaEntry.x) < Math.abs(deltaEntry.y)) {
                 if (deltaEntry.y < 0) {
                     normal = createVector(0, 1);
                 } else {
@@ -99,6 +99,10 @@ export default class RectBody extends AABB {
                 }
 
                 side.x = Math.sign(velocity.x);
+            } else {
+                stroke(0, 0, 255);
+                noFill();
+                rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
             }
         }
 

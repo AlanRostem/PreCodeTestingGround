@@ -5,6 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/player.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/player.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
