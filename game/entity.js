@@ -83,7 +83,7 @@ export default class Entity {
             }
         }
 
-        // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position. 
+        // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
         if (hit) {
             if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
@@ -115,6 +115,11 @@ export default class Entity {
         this.body.update(world, deltaTime);
         this.scanEntities(world.entities, deltaTime);
         this.scanTiles(world.tileMap, deltaTime);
+        for (let e of this.collisionStack) {
+            stroke(255);
+            noFill();
+            rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
+        }
         this.checkCollision(deltaTime);
         if (this.collisionStack.length > 0) this.collisionStack = [];
     }
