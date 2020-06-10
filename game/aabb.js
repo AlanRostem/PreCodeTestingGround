@@ -5,6 +5,10 @@ export default class AABB {
         this.extents = extents;
     }
 
+    get area() {
+        return this.extents.x * 2 + this.extents.y * 2;
+    }
+
     overlaps(aabb) {
         return this.left < aabb.right &&
             this.right > aabb.left &&
