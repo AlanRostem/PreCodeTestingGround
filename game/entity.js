@@ -60,10 +60,12 @@ export default class Entity {
         }
     }
 
+    // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
         let hit;
         let stack = [];
 
+        // Retrieve the closest AABB to resolve collision for it
         for (let aabb of collisionStack) {
             if (aabb !== this) {
                 if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(aabb)) {
@@ -81,6 +83,7 @@ export default class Entity {
             }
         }
 
+        // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position. 
         if (hit) {
             if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
@@ -101,6 +104,7 @@ export default class Entity {
             );
 
             if (time > 0 && count < 5)
+                // Keep resolving collisions for the other potential collisions
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime))
