@@ -2,9 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/template/aabb.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/entity.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/player.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/rect-body.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/sweep.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/tile-map.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/tile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/template/world.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,8 +43,13 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/swept-minkowski" />
     <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Dev\PreCodeTestingGround\swept-minkowski" />
+    </key>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -108,9 +121,9 @@
     </option>
   </component>
   <component name="WindowStateProjectService">
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1591447059516">
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1591833190312">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1591447059516" />
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1591833190312" />
   </component>
 </project>
