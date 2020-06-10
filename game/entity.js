@@ -121,8 +121,8 @@ export default class Entity {
         }
         stroke(255, 0, 0);
         line(this.body.center.x, this.body.center.y,
-            this.body.center.x + this.body.vel.x / Tile.SIZE,
-            this.body.center.y + this.body.vel.y / Tile.SIZE);
+            this.body.center.x + this.body.vel.x * deltaTime,
+            this.body.center.y + this.body.vel.y * deltaTime);
         this.checkCollision(deltaTime);
         if (this.collisionStack.length > 0) this.collisionStack = [];
     }
@@ -145,7 +145,7 @@ export default class Entity {
     draw() {
         let e = this.body.getCollisionBoundary(deltaTime / 1000);
         noFill();
-        stroke(255, 255, 0);
+        stroke(255, 0, 0);
         rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
         rectMode(CENTER);
         noStroke();
