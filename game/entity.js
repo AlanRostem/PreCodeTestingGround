@@ -2,7 +2,7 @@ import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
 
 export default class Entity {
-    constructor(body = new RectBody(createVector(Tile.SIZE * 10, Tile.SIZE * 15), createVector(Tile.SIZE/2, Tile.SIZE/2))) {
+    constructor(body = new RectBody(createVector(Tile.SIZE * 10, Tile.SIZE * 15), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
@@ -72,6 +72,7 @@ export default class Entity {
                     let sweep = this.body.getSweepObject(aabb, movement, deltaTime);
                     stack.push(aabb);
                     sweep.center = aabb.center;
+                    sweep.extents = aabb.extents;
                     if (hit) {
                         if (sweep.collisionTime < hit.collisionTime) {
                             hit = sweep;
@@ -96,15 +97,13 @@ export default class Entity {
 
             this.onCollision(hit.side);
 
-            stroke(255);
+            stroke(0, 255, 0);
             strokeWeight(1);
-            line(
-                this.body.center.x, this.body.center.y,
-                hit.center.x, hit.center.y,
-            );
+            rect(hit.center.x, hit.center.y, hit.extents.x * 2, hit.extents.y * 2);
+
 
             if (time > 0 && count < 5)
-                // Keep resolving collisions for the other potential collisions
+            // Keep resolving collisions for the other potential collisions
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime))
@@ -116,10 +115,14 @@ export default class Entity {
         this.scanEntities(world.entities, deltaTime);
         this.scanTiles(world.tileMap, deltaTime);
         for (let e of this.collisionStack) {
-            stroke(255);
+            stroke(255, 255, 255, 100);
             noFill();
             rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
         }
+        stroke(255, 0, 0);
+        line(this.body.center.x, this.body.center.y,
+            this.body.center.x + this.body.vel.x / Tile.SIZE,
+            this.body.center.y + this.body.vel.y / Tile.SIZE);
         this.checkCollision(deltaTime);
         if (this.collisionStack.length > 0) this.collisionStack = [];
     }
@@ -140,7 +143,7 @@ export default class Entity {
     }
 
     draw() {
-        let e = this.body.getCollisionBoundary(deltaTime/1000);
+        let e = this.body.getCollisionBoundary(deltaTime / 1000);
         noFill();
         stroke(255, 255, 0);
         rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
