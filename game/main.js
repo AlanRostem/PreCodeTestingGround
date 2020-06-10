@@ -30,10 +30,7 @@ window.mousePressed = () => {
 };
 
 window.draw = () => {
-
-    let scaleFactor = 2;
-    translate((-player.body.center.x * scaleFactor + width / 2), (-player.body.center.y * scaleFactor + height / 2));
-    scale(scaleFactor, scaleFactor);
+    scale(2, 2);
     world.draw();
     world.update(deltaTime / 1000);
 };

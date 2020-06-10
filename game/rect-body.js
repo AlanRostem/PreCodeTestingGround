@@ -102,9 +102,9 @@ export default class RectBody extends AABB {
             }
         }
 
-        resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
+        //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(resultTime, normal, side);
+        return new Sweep(aabb, resultTime, normal, side);
     }
 
     update(world, deltaTime) {

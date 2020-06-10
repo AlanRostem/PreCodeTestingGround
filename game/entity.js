@@ -1,5 +1,6 @@
 import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
+import Sweep from "./sweep.js";
 
 export default class Entity {
     constructor(body = new RectBody(createVector(Tile.SIZE * 10, Tile.SIZE * 15), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
@@ -28,7 +29,7 @@ export default class Entity {
         for (let entity of entities) {
             if (entity !== this) {
                 if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
-                    this.collisionStack.push(entity.body);
+                    this.collisionStack.push(new Sweep(entity.body));
                 }
             }
         }
@@ -55,7 +56,7 @@ export default class Entity {
                     !bounds.overlaps(tile)
                 ) continue;
 
-                this.collisionStack.push(tile);
+                this.collisionStack.push(new Sweep(tile));
             }
         }
     }
@@ -66,20 +67,16 @@ export default class Entity {
         let stack = [];
 
         // Retrieve the closest AABB to resolve collision for it
-        for (let aabb of collisionStack) {
-            if (aabb !== this) {
-                if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(aabb)) {
-                    let sweep = this.body.getSweepObject(aabb, movement, deltaTime);
-                    stack.push(aabb);
-                    sweep.center = aabb.center;
-                    sweep.extents = aabb.extents;
-                    if (hit) {
-                        if (sweep.collisionTime < hit.collisionTime) {
-                            hit = sweep;
-                        }
-                    } else {
-                        hit = sweep;
+        for (let sweep of collisionStack) {
+            if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(sweep.aabb)) {
+                let newSweep = this.body.getSweepObject(sweep.aabb, movement, deltaTime);
+                stack.push(newSweep);
+                if (hit) {
+                    if (newSweep.collisionTime <= hit.collisionTime) {
+                        hit = newSweep;
                     }
+                } else {
+                    hit = newSweep;
                 }
             }
         }
@@ -99,8 +96,9 @@ export default class Entity {
 
             stroke(0, 255, 0);
             strokeWeight(1);
-            rect(hit.center.x, hit.center.y, hit.extents.x * 2, hit.extents.y * 2);
+            rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
+            text(""+count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
 
             if (time > 0 && count < 5)
             // Keep resolving collisions for the other potential collisions
@@ -117,7 +115,7 @@ export default class Entity {
         for (let e of this.collisionStack) {
             stroke(255, 255, 255, 100);
             noFill();
-            rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
+            rect(e.aabb.center.x, e.aabb.center.y, e.aabb.extents.x * 2, e.aabb.extents.y * 2);
         }
         stroke(255, 0, 0);
         line(this.body.center.x, this.body.center.y,
