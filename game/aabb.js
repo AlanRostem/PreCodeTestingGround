@@ -1,8 +1,12 @@
 export default class AABB {
-    static EPSILON = 0;1e-2;
+    static EPSILON = 1e-5;
     constructor(center, extents) {
         this.center = center;
         this.extents = extents;
+    }
+
+    get area() {
+        return this.extents.x * 2 + this.extents.y * 2;
     }
 
     overlaps(aabb) {
