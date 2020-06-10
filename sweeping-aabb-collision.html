@@ -15,7 +15,7 @@
 <body>
 <script>
     class AABB {
-        static EPSILON = 1e-5;
+        static EPSILON = 1e-8;
 
         constructor(center, extents) {
             this.center = center;
@@ -126,7 +126,7 @@
             for (let entity of entities){
                 if (entity !== this){
                     if (this.overlaps(entity))
-                        stopShit(this);
+                        abort(this); // Stop the game loop and show which entity overlaps
                 }
             }
         }
@@ -245,25 +245,30 @@
 
             if (!(maxEntryTime > minExitTime ||
                 (entryTime.x < 0 && entryTime.y < 0)
-                || (entryTime.x < 0 && (this.right < aabb.left || this.left > aabb.right))
-                || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
+                || (entryTime.x < 0 && (this.right + velocity.x * maxEntryTime < aabb.left || this.left + velocity.x * maxEntryTime > aabb.right))
+                || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
             )) {
                 resultTime = maxEntryTime;
-                if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) {
-                    if (deltaEntry.x < 0) {
+                if (entryTime.x < entryTime.y) {
+                    if (deltaEntry.x > 0) {
                         normal = createVector(1, 0);
                     } else {
                         normal = createVector(-1, 0);
                     }
-                } else {
-                    if (deltaEntry.y < 0) {
+
+                } else if (entryTime.x > entryTime.y) {
+                    if (deltaEntry.y > 0) {
                         normal = createVector(0, 1);
                     } else {
                         normal = createVector(0, -1);
                     }
+                } else {
+                    // Corner collision!
+                    console.log(resultTime); // <- Prints 0 always!
                 }
             }
-            resultTime = Math.floor((resultTime / AABB.EPSILON)) * AABB.EPSILON;
+
+            resultTime = parseFloat(Math.floor((resultTime/AABB.EPSILON)*AABB.EPSILON).toFixed(Math.log10(1/AABB.EPSILON)));
 
             return new Sweep(resultTime, normal);
         }
@@ -296,7 +301,7 @@
             entities.push(
                 new CollidingAABB(
                     createVector(mouseX, mouseY),
-                    createVector(random(16, 8) | 0, random(16, 8) | 0),
+                    createVector(16, 16),
                 ));
         else if (mouseButton === "right") {
             for (let e of entities) {
@@ -315,7 +320,7 @@
 
     let stopped;
 
-    function stopShit(aabb) {
+    function abort(aabb) {
         stopped = aabb;
     }
 
@@ -329,7 +334,6 @@
         if (stopped) {
             fill(255);
             rect(stopped.center.x, stopped.center.y, stopped.extents.x * 2, stopped.extents.y * 2);
-            setTimeout(() => stopped = null, 10e6);
             return;
         }
 
