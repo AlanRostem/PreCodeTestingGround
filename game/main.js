@@ -5,6 +5,7 @@ import Player from "./player.js"
 
 let world;
 let player;
+const scaleFactor = 2;
 
 window.setup = () => {
     createCanvas(640, 640);
@@ -24,13 +25,13 @@ window.addEventListener("keydown", e => {
 window.mousePressed = () => {
     world.spawnEntity(new Entity(
         new RectBody(
-            createVector(mouseX, mouseY),
+            createVector(mouseX/scaleFactor, mouseY/scaleFactor),
             createVector(16, 16))
     ));
 };
 
 window.draw = () => {
-    scale(2, 2);
+    scale(scaleFactor, scaleFactor);
     world.draw();
     world.update(deltaTime / 1000);
 };
