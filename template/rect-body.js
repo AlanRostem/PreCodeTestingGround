@@ -5,7 +5,7 @@ export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
 
-    getCollisionBoundary(deltaTime, movement = this.vel) {
+    getVelocityBoundary(deltaTime, movement = this.vel) {
         let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
         let vel = p5.Vector.mult(movement, deltaTime);
         if (vel.x > 0) {

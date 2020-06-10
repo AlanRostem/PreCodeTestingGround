@@ -28,7 +28,7 @@ export default class Entity {
     scanEntities(entities, deltaTime) {
         for (let entity of entities) {
             if (entity !== this) {
-                if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
+                if (this.body.getVelocityBoundary(deltaTime).overlaps(entity.body)) {
                     // TODO: Reserve collision resolution
                 }
             }
@@ -36,7 +36,7 @@ export default class Entity {
     }
 
     scanTiles(tileMap, deltaTime) {
-        let bounds = this.body.getCollisionBoundary(deltaTime);
+        let bounds = this.body.getVelocityBoundary(deltaTime);
         let centralTile = Tile.toTile(bounds.center);
         const proxy = 1;
         let tileX = Math.round(bounds.extents.x * 2 / Tile.SIZE + proxy);
@@ -61,13 +61,16 @@ export default class Entity {
         }
     }
 
+    resolveCollision(deltaTime) {
+        // TODO: Implement
+    }
 
     update(world, deltaTime) {
         this.body.update(world, deltaTime);
         this.body.center.add(this.body.vel.copy().mult(deltaTime));
         this.scanEntities(world.entities, deltaTime);
         this.scanTiles(world.tileMap, deltaTime);
-
+        this.resolveCollision(deltaTime);
     }
 
 
