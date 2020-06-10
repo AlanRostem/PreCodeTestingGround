@@ -84,24 +84,23 @@ export default class RectBody extends AABB {
         )) {
             resultTime = maxEntryTime;
             if (entryTime.x < entryTime.y) {
-                if (deltaEntry.x > 0) {
-                    normal = createVector(1, 0);
-                } else {
-                    normal = createVector(-1, 0);
-                }
-
+                normal = createVector(Math.sign(deltaEntry.x), 0);
                 side.y = Math.sign(velocity.y);
-
             } else if (entryTime.x > entryTime.y) {
-                if (deltaEntry.y > 0) {
-                    normal = createVector(0, 1);
-                } else {
-                    normal = createVector(0, -1);
-                }
+                normal = createVector(0, Math.sign(deltaEntry.y));
                 side.x = Math.sign(velocity.x);
             } else {
+                let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
+
+                if (absVel.x > absVel.y) {
+                    normal = createVector(Math.sign(velocity.x), 0);
+                    side.x = Math.sign(velocity.x);
+                } else if (absVel.x < absVel.y) {
+                    normal = createVector(Math.sign(velocity.y), 0);
+                    side.y = Math.sign(velocity.y);
+                }
+
                 // Equilibrium in axis collision
-                console.log(resultTime);
                 stroke(0, 0, 255);
                 noFill();
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);

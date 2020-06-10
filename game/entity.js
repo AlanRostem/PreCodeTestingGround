@@ -71,7 +71,7 @@ export default class Entity {
 
         // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
         if (hit) {
-            if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
+            // if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
             this.body.center.x += movement.x * hit.collisionTime * deltaTime;
             this.body.center.y += movement.y * hit.collisionTime * deltaTime;

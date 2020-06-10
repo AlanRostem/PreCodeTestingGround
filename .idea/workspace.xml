@@ -3,9 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sweeping-aabb-collision.html" beforeDir="false" afterPath="$PROJECT_DIR$/sweeping-aabb-collision.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,15 +38,15 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
+  <component name="ServiceViewManager">
+    <option name="viewStates">
       <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
       </list>
     </option>
   </component>
