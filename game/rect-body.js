@@ -100,6 +100,7 @@ export default class RectBody extends AABB {
 
                 side.x = Math.sign(velocity.x);
             } else {
+                // Equilibrium in axis collision
                 stroke(0, 0, 255);
                 noFill();
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
