@@ -92,20 +92,20 @@ export default class RectBody extends AABB {
 
                 side.y = Math.sign(velocity.y);
 
-            } else {
+            } else if (entryTime.x > entryTime.y) {
                 if (deltaEntry.y > 0) {
                     normal = createVector(0, 1);
                 } else {
                     normal = createVector(0, -1);
                 }
                 side.x = Math.sign(velocity.x);
-            } /*else {
+            } else {
                 // Equilibrium in axis collision
-
+                console.log(resultTime);
                 stroke(0, 0, 255);
                 noFill();
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
-            }*/
+            }
         }
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;

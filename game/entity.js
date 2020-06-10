@@ -76,10 +76,6 @@ export default class Entity {
             this.body.center.x += movement.x * hit.collisionTime * deltaTime;
             this.body.center.y += movement.y * hit.collisionTime * deltaTime;
 
-
-            this.body.center.x = Math.round(this.body.center.x);
-            this.body.center.y = Math.round(this.body.center.y);
-
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
@@ -105,9 +101,6 @@ export default class Entity {
             }
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime));
-
-            this.body.center.x = Math.round(this.body.center.x);
-            this.body.center.y = Math.round(this.body.center.y);
         }
     }
 

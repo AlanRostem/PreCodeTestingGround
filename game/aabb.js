@@ -1,6 +1,5 @@
 export default class AABB {
-    static EPSILON = 1e-0;
-
+    static EPSILON = 1e-8;
     constructor(center, extents) {
         this.center = center;
         this.extents = extents;
