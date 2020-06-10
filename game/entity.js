@@ -29,7 +29,7 @@ export default class Entity {
         for (let entity of entities) {
             if (entity !== this) {
                 if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
-                    this.collisionStack.push(new Sweep(entity.body));
+                    this.collisionStack.push(this.body.getSweepObject(entity.body, this.body.vel, deltaTime));
                 }
             }
         }
@@ -56,18 +56,21 @@ export default class Entity {
                     !bounds.overlaps(tile)
                 ) continue;
 
-                this.collisionStack.push(new Sweep(tile));
+                this.collisionStack.push(this.body.getSweepObject(tile, this.body.vel, deltaTime));
             }
         }
     }
 
     // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        let hit;
-        let stack = [];
+        collisionStack.sort((a, b) => {
+            return a.collisionTime - b.collisionTime;
+        });
+
+        let hit = collisionStack.shift();
 
         // Retrieve the closest AABB to resolve collision for it
-        for (let sweep of collisionStack) {
+        /*for (let sweep of collisionStack) {
             if (this.body.getCollisionBoundary(deltaTime, movement).overlaps(sweep.aabb)) {
                 let newSweep = this.body.getSweepObject(sweep.aabb, movement, deltaTime);
                 stack.push(newSweep);
@@ -79,7 +82,7 @@ export default class Entity {
                     hit = newSweep;
                 }
             }
-        }
+        }*/
 
         // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
         if (hit) {
@@ -98,11 +101,19 @@ export default class Entity {
             strokeWeight(1);
             rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
-            text(""+count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
+            text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
 
-            if (time > 0 && count < 5)
-            // Keep resolving collisions for the other potential collisions
+            if (time > 0) {
+                let stack = [];
+                for (let sweep of collisionStack) {
+                    if (this.body.getCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
+                        let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime);
+                        stack.push(newSweep);
+                    }
+                }
+                // Keep resolving collisions for the other potential collisions
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
+            }
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime))
         }

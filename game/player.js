@@ -35,8 +35,8 @@ export default class Player extends Entity {
 
     onBottomCollision() {
         this.jumping = false;
-        //this.body.vel.x = 0;
-        this.body.vel.y = 0;
+        this.body.vel.x = 0;
+        //this.body.vel.y = 0;
     }
 
     update(world, deltaTime) {
