@@ -3,7 +3,7 @@ import Tile from "./tile.js";
 import Sweep from "./sweep.js";
 
 export default class Entity {
-    constructor(body = new RectBody(createVector(Tile.SIZE * 10, Tile.SIZE * 15), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
+    constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
@@ -63,11 +63,19 @@ export default class Entity {
 
     // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        collisionStack.sort((a, b) => {
-            return a.collisionTime - b.collisionTime;
-        });
+        /*collisionStack.sort((a, b) => {
+            return -a.distance + b.distance;
+        });*/
 
-        let hit = collisionStack.shift();
+
+        collisionStack.sort((a, b) => {
+            return Math.sign(movement.x) * (a.collisionTime - b.collisionTime);
+        });
+        let hit;
+        if (movement.x < 0)
+            hit = collisionStack.pop();
+        else
+            hit = collisionStack.shift();
 
         // Retrieve the closest AABB to resolve collision for it
         /*for (let sweep of collisionStack) {

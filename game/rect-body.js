@@ -79,37 +79,39 @@ export default class RectBody extends AABB {
 
         if (!(maxEntryTime > minExitTime ||
             (entryTime.x < 0 && entryTime.y < 0)
-            || (entryTime.x < 0 && (this.right < aabb.left || this.left > aabb.right))
-            || (entryTime.y < 0 && (this.bottom < aabb.top || this.top > aabb.bottom))
+            || (entryTime.x < 0 && (this.right + velocity.x * maxEntryTime < aabb.left || this.left + velocity.x * maxEntryTime > aabb.right))
+            || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
         )) {
             resultTime = maxEntryTime;
-            if (Math.abs(deltaEntry.x) > Math.abs(deltaEntry.y)) {
-                if (deltaEntry.x < 0) {
+            if (entryTime.x < entryTime.y) {
+                if (deltaEntry.x > 0) {
                     normal = createVector(1, 0);
                 } else {
                     normal = createVector(-1, 0);
                 }
 
                 side.y = Math.sign(velocity.y);
-            } else if (Math.abs(deltaEntry.x) < Math.abs(deltaEntry.y)) {
-                if (deltaEntry.y < 0) {
+
+            } else {
+                if (deltaEntry.y > 0) {
                     normal = createVector(0, 1);
                 } else {
                     normal = createVector(0, -1);
                 }
-
+                resultTime = maxEntryTime;
                 side.x = Math.sign(velocity.x);
-            } else {
+            } /*else {
                 // Equilibrium in axis collision
+
                 stroke(0, 0, 255);
                 noFill();
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
-            }
+            }*/
         }
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(aabb, resultTime, normal, side);
+        return new Sweep(aabb, resultTime, normal, side, Math.abs(this.center.magSq()- aabb.center.magSq()));
     }
 
     update(world, deltaTime) {
