@@ -1,6 +1,6 @@
 import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
-import Sweep from "./sweep.js";
+import AABB from "./aabb.js";
 
 export default class Entity {
     constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
@@ -63,16 +63,11 @@ export default class Entity {
 
     // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        /*collisionStack.sort((a, b) => {
-            return -a.distance + b.distance;
-        });*/
-
-
         collisionStack.sort((a, b) => {
             return Math.sign(movement.x) * (a.collisionTime - b.collisionTime);
         });
         let hit;
-        if (movement.x < 0)
+        if (movement.x <= 0)
             hit = collisionStack.pop();
         else
             hit = collisionStack.shift();
@@ -96,8 +91,12 @@ export default class Entity {
         if (hit) {
             if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
-            this.body.center.x += movement.x * hit.collisionTime * deltaTime; // - Math.sign(movement.x) * AABB.EPSILON;
-            this.body.center.y += movement.y * hit.collisionTime * deltaTime; // - Math.sign(movement.y) * AABB.EPSILON;
+            this.body.center.x += movement.x * hit.collisionTime * deltaTime;
+            this.body.center.y += movement.y * hit.collisionTime * deltaTime;
+
+
+            this.body.center.x = parseFloat(this.body.center.x.toFixed(-Math.log10(AABB.EPSILON)));
+            this.body.center.y = parseFloat(this.body.center.y.toFixed(-Math.log10(AABB.EPSILON)));
 
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
@@ -123,7 +122,10 @@ export default class Entity {
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
             }
         } else {
-            this.body.center.add(p5.Vector.mult(movement, deltaTime))
+            this.body.center.add(p5.Vector.mult(movement, deltaTime));
+
+            this.body.center.x = parseFloat(this.body.center.x.toFixed(-Math.log10(AABB.EPSILON)));
+            this.body.center.y = parseFloat(this.body.center.y.toFixed(-Math.log10(AABB.EPSILON)));
         }
     }
 
