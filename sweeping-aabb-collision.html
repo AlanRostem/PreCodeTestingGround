@@ -16,6 +16,7 @@
 <script>
     class AABB {
         static EPSILON = 1e-5;
+
         constructor(center, extents) {
             this.center = center;
             this.extents = extents;
@@ -23,7 +24,6 @@
         }
 
         overlaps(aabb) {
-
             return this.left < aabb.right &&
                 this.right > aabb.left &&
                 this.top < aabb.bottom &&
@@ -49,35 +49,35 @@
         }
 
         get top() {
-            return this.center.y - this.extents.y + AABB.EPSILON;
+            return this.center.y - this.extents.y;// + AABB.EPSILON;
         }
 
         set top(y) {
-            this.center.y = y + this.extents.y - AABB.EPSILON;
+            this.center.y = y + this.extents.y;// - AABB.EPSILON;
         }
 
         get bottom() {
-            return this.center.y + this.extents.y - AABB.EPSILON;
+            return this.center.y + this.extents.y;// - AABB.EPSILON;
         }
 
         set bottom(y) {
-            this.center.y = y - this.extents.y + AABB.EPSILON;
+            this.center.y = y - this.extents.y;// + AABB.EPSILON;
         }
 
         get left() {
-            return this.center.x - this.extents.x + AABB.EPSILON;
+            return this.center.x - this.extents.x;// + AABB.EPSILON;
         }
 
         set left(x) {
-            this.center.x = x + this.extents.x - AABB.EPSILON;
+            this.center.x = x + this.extents.x;// - AABB.EPSILON;
         }
 
         get right() {
-            return this.center.x + this.extents.x - AABB.EPSILON;
+            return this.center.x + this.extents.x;// - AABB.EPSILON;
         }
 
         set right(x) {
-            this.center.x = x - this.extents.x + AABB.EPSILON;
+            this.center.x = x - this.extents.x;// + AABB.EPSILON;
         }
 
         update() {
@@ -123,10 +123,10 @@
             this.checkCollision();
             this.updateMovement();
 
-            for (let entity of entities){
-                if (entity !== this){
-                    if (this.overlaps(entity));
-                        //stopShit(this);
+            for (let entity of entities) {
+                if (entity !== this) {
+                    if (this.overlaps(entity))
+                        stopShit(this);
                 }
             }
         }
@@ -176,8 +176,8 @@
             if (nearest) {
                 if (nearest.collisionTime > remainingTime) nearest.collisionTime = remainingTime;
 
-                this.center.x += movement.x * nearest.collisionTime * deltaTime/1000;// - Math.sign(movement.x) * eps;
-                this.center.y += movement.y * nearest.collisionTime * deltaTime/1000;// - Math.sign(movement.y) * eps;
+                this.center.x += movement.x * nearest.collisionTime * deltaTime / 1000;// - Math.sign(movement.x) * eps;
+                this.center.y += movement.y * nearest.collisionTime * deltaTime / 1000;// - Math.sign(movement.y) * eps;
 
                 let time = remainingTime - nearest.collisionTime;
                 let dotProduct = p5.Vector.dot(movement, nearest.normal) * time;
@@ -263,7 +263,7 @@
                     }
                 }
             }
-            resultTime = Math.floor((resultTime / AABB.EPSILON)) * AABB.EPSILON;
+            //resultTime = Math.floor((resultTime / AABB.EPSILON)) * AABB.EPSILON;
 
             return new Sweep(resultTime, normal);
         }
