@@ -3,7 +3,9 @@ import Tile from "./tile.js";
 import AABB from "./aabb.js";
 
 export default class Entity {
-    constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(Tile.SIZE / 2, Tile.SIZE / 2))) {
+    constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(
+        Tile.SIZE / 2,
+        Tile.SIZE / 2))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
@@ -63,9 +65,7 @@ export default class Entity {
 
     // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
-        collisionStack.sort((a, b) => {
-            return a.collisionTime - b.collisionTime;
-        });
+        collisionStack.sort((a, b) => a.collisionTime - b.collisionTime);
 
         let hit = collisionStack.shift();
 
@@ -73,8 +73,8 @@ export default class Entity {
         if (hit) {
             // if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
 
-            this.body.center.x += movement.x * hit.collisionTime * deltaTime;
-            this.body.center.y += movement.y * hit.collisionTime * deltaTime;
+            this.body.center.x += movement.x * hit.collisionTime * deltaTime;// - Math.sign(movement.x) * AABB.EPSILON;
+            this.body.center.y += movement.y * hit.collisionTime * deltaTime;// - Math.sign(movement.y) * AABB.EPSILON;
 
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
