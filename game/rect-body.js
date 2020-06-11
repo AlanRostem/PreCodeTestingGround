@@ -90,17 +90,19 @@ export default class RectBody extends AABB {
                 normal = createVector(0, Math.sign(deltaEntry.y));
                 side.x = Math.sign(velocity.x);
             } else {
+                // Problem: Both axes have equal intersection depth (direct and perfect corner collision).
+                // We need to use velocity to determine the correct collision normal
                 let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
 
+                // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
                 if (absVel.x > absVel.y) {
                     normal = createVector(Math.sign(velocity.x), 0);
-                    side.x = Math.sign(velocity.x);
-                } else if (absVel.x < absVel.y) {
-                    normal = createVector(Math.sign(velocity.y), 0);
                     side.y = Math.sign(velocity.y);
+                } else if (absVel.x < absVel.y) {
+                    normal = createVector(0, Math.sign(velocity.y));
+                    side.x = Math.sign(velocity.x);
                 }
 
-                // Equilibrium in axis collision
                 stroke(0, 0, 255);
                 noFill();
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
