@@ -38,6 +38,8 @@ export default class World {
     }
 
     draw() {
+
+        smooth(true)
         background(150, 0, 50);
         this.tileMap.draw();
         for (let e of this.entities) {

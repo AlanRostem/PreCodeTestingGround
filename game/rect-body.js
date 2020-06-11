@@ -1,14 +1,17 @@
 import AABB from "./aabb.js"
 import Sweep from "./sweep.js"
+import Tile from "./tile.js"
 
 export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
 
-    constructor(e,c) {
+    constructor(e, c) {
         super(e, c);
-        this.extents.x -= (AABB.EPSILON);
-        this.extents.y -= (AABB.EPSILON);
+        if (this.extents.x * 2 % Tile.SIZE === 0)
+            this.extents.x -= (AABB.EPSILON);
+        if (this.extents.y * 2 % Tile.SIZE === 0)
+            this.extents.y -= (AABB.EPSILON);
     }
 
     getCollisionBoundary(deltaTime, movement = this.vel) {
@@ -129,7 +132,7 @@ export default class RectBody extends AABB {
                  *
                  * In conclusion, the concept of "if x > y then resolve for x and vice-versa" is
                  * fundamentally flawed for all use-cases of swept AABB collision, and needs to
-                 * be reevaluated. 
+                 * be reevaluated.
                  */
 
                 fill(0, 255, 255);
