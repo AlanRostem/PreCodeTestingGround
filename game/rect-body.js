@@ -91,7 +91,7 @@ export default class RectBody extends AABB {
                 side.x = Math.sign(velocity.x);
             } else {
                 // Problem: Both axes have equal intersection depth (direct and perfect corner collision).
-                // We need to use velocity to determine the correct collision normal
+                // We need to use the velocity to determine the correct collision normal
                 let absVel = createVector(Math.abs(this.vel.x), Math.abs(this.vel.y));
 
                 // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
@@ -103,8 +103,30 @@ export default class RectBody extends AABB {
                     side.x = Math.sign(velocity.x);
                 }
 
-                stroke(0, 0, 255);
-                noFill();
+                /**
+                 * This causes an issue than entities with the size equal to a tile cannot pass through
+                 * a tile "hole". The reason for this is that the collision normal changes to one axis
+                 * with its respective direction, which makes sense if you want to solve the "crack"
+                 * problem in the long-term.
+                 *
+                 * Another potential issue is if the velocity of both axes is perfectly equal. This
+                 * would satisfy the condition "absVel.x == absVel.y" which means we do not handle
+                 * any collision normal ("normal"-variable defaults to p5.Vector(0, 0)). This would
+                 * rarely happen in a platformer, but could happen nonetheless.
+                 *
+                 * There needs to be a solution to both problems simultaneously. I have yet to find
+                 * that out, but the idea remains the same; to prioritize one axis over the other.
+                 * My idea is that we can prioritize y over x since we involve gravity (which is
+                 * usually applied to y), if and only if the velocity on both axes remain equal.
+                 * However, concepts such as multi-directional gravity (e.g. diagonal gravity or
+                 * x-axis gravity on magnet blocks in Pivot) will be problematic.
+                 *
+                 * In conclusion, the concept of "if x > y then resolve for x and vice-versa" is
+                 * fundamentally flawed for all use-cases of swept AABB collision, and needs to
+                 * be reevaluated. 
+                 */
+
+                fill(0, 255, 255);
                 rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
             }
         }
