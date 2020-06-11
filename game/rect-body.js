@@ -113,7 +113,7 @@ export default class RectBody extends AABB {
                 }
 
                 /**
-                 * This causes an issue than entities with the size equal to a tile cannot pass through
+                 * This causes an issue where entities with the size equal to a tile cannot pass through
                  * a tile "hole". The reason for this is that the collision normal changes to one axis
                  * with its respective direction, which makes sense if you want to solve the "crack"
                  * problem in the long-term.
