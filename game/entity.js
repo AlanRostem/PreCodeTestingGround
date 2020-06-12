@@ -45,7 +45,6 @@ export default class Entity {
             if (entity !== this) {
                 if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
                     this.collisionStack.push(this.body.getSweepObject(entity.body, this.body.vel, deltaTime, entity));
-                    this.onHitEntity(entity);
                 }
             }
         }
@@ -85,8 +84,6 @@ export default class Entity {
 
         // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
         if (hit) {
-            // if (hit.collisionTime > remainingTime) hit.collisionTime = remainingTime;
-
             this.body.center.x += movement.x * hit.collisionTime * deltaTime;// - Math.sign(movement.x) * AABB.EPSILON;
             this.body.center.y += movement.y * hit.collisionTime * deltaTime;// - Math.sign(movement.y) * AABB.EPSILON;
 
@@ -164,9 +161,5 @@ export default class Entity {
         noStroke();
         fill(this.color);
         rect(this.body.center.x, this.body.center.y, this.body.extents.x * 2, this.body.extents.y * 2);
-    }
-
-    onHitEntity(entity) {
-
     }
 }
