@@ -1,18 +1,9 @@
 import AABB from "./aabb.js"
 import Sweep from "./sweep.js"
-import Tile from "./tile.js"
 
 export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
-
-    constructor(e, c) {
-        super(e, c);
-        if (this.extents.x * 2 % Tile.SIZE === 0)
-            this.extents.x -= (AABB.EPSILON);
-        if (this.extents.y * 2 % Tile.SIZE === 0)
-            this.extents.y -= (AABB.EPSILON);
-    }
 
     getCollisionBoundary(deltaTime, movement = this.vel) {
         let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());

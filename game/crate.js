@@ -4,7 +4,7 @@ import Tile from "./tile.js";
 export default class Crate extends Entity {
     pushing = false;
     update(world, deltaTime) {
-        this.body.acc.y = Tile.SIZE * 10;
+        this.body.acc.y = Tile.SIZE * 40;
         super.update(world, deltaTime);
     }
 

@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/game/crate.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/crate.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/crate.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/player.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/player.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/sweep.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/sweep.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/tile-map.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/tile-map.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -88,7 +84,7 @@
       <workItem from="1591653260406" duration="4198000" />
       <workItem from="1591729001784" duration="1774000" />
       <workItem from="1591800901821" duration="617000" />
-      <workItem from="1591971124991" duration="8784000" />
+      <workItem from="1591971124991" duration="9140000" />
     </task>
     <servers />
   </component>
