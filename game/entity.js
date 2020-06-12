@@ -67,8 +67,8 @@ export default class Entity {
                 if (
                     xx < 0 || xx >= tileMap.width ||
                     yy < 0 || yy >= tileMap.height ||
-                    tileMap.getTileId(xx, yy) === 0 ||
-                    !bounds.overlaps(tile)
+                    tileMap.getTileId(xx, yy) === 0
+                    || !bounds.overlaps(tile)
                 ) continue;
 
                 this.collisionStack.push(this.body.getSweepObject(tile, this.body.vel, deltaTime));
