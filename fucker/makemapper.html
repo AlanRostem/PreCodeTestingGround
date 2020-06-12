@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MakeMapper</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<script>
+    class IntervalTree {
+        static #Interval = class Interval {
+            constructor(low, high) {
+                this.low = low;
+                this.high = high;
+            }
+        };
+
+        static #Node = class Node {
+            constructor(left, right, value, max, interval) {
+                this.left = left;
+                this.right = right;
+                this.value = value;
+                this.interval = interval;
+                this.max = max;
+            }
+        };
+
+        static #checkOverlap = (i0, i1) => {
+            return i0.low <= i1.high && i1.low <= i0.high;
+        };
+
+        #root = null;
+
+        #newNode = (_interval, _value) => {
+            return new this.constructor.#Node(null, null, _value, _interval.high, _interval);
+        };
+
+        #insertUtil = (_node, _interval, _value) => {
+            if (_node == null) {
+                return this.#newNode(_interval, _value);
+            }
+
+            let low = this.#root.interval.low;
+
+            if (_interval.low < low) {
+                this.#root.left = this.#insertUtil(this.#root.left, _interval, _value);
+            } else {
+                this.#root.right = this.#insertUtil(this.#root.right, _interval, _value);
+            }
+
+            if (this.#root.max < _interval.high) {
+                this.#root.max = _interval.high;
+            }
+
+            return _node;
+        };
+
+        #overlapSearch = (_node, _interval) => {
+            if (_node === null) return null;
+            if (this.constructor.#checkOverlap(_node.interval, _interval)) {
+                return _node.value;
+            }
+
+            if (_node.left !== null && _node.left.max >= _interval.low) {
+                return this.#overlapSearch(_node.left, _interval);
+            }
+
+            return this.#overlapSearch(_node.right, _interval);
+        };
+
+        insert(low, high, value) {
+            this.#root = this.#insertUtil(this.#root,
+                new this.constructor.#Interval(low, high), value);
+        }
+
+        get(pos) {
+            return this.#overlapSearch(this.#root, new this.constructor.#Interval(pos, pos));
+        }
+    }
+
+    class Tile {
+        static SIZE = 16;
+        x = 0;
+        y = 0;
+        id = -1;
+
+        constructor(x, y, id = -1) {
+            this.x = x;
+            this.y = y;
+            this.id = id;
+        }
+
+        toVec() {
+            return createVector(
+                this.x * Tile.SIZE,
+                this.y * Tile.SIZE,
+            );
+        }
+    }
+
+
+    class TileMap {
+        static SIZE = 16;
+        width = 0;
+        height = 0;
+        array = [];
+
+        constructor(width = 20, height = 20, array = new Array(width * height).fill(0, 1, width * height)) {
+            this.width = width;
+            this.height = height;
+            this.array = array;
+        }
+
+        getTileId(x, y) {
+            return this.array[x + y * this.width];
+        }
+
+        draw() {
+            for (let x = 0; x < this.width; x++)
+                for (let y = 0; y < this.height; y++) {
+                    let id = this.getTileId(x, y);
+                    let pos = new Tile(x, y).toVec();
+                    if (id > 0) {
+                        id--;
+                        let w = img.width / TileMap.SIZE | 0;
+                        image(img, pos.x, pos.y,
+                            TileMap.SIZE, TileMap.SIZE,
+
+                            id % w * TileMap.SIZE, (id / w | 0) * TileMap.SIZE,
+                            TileMap.SIZE, TileMap.SIZE);
+                    } else {
+                        stroke(0);
+                        rect(pos.x, pos.y, TileMap.SIZE, TileMap.SIZE);
+                    }
+                }
+        }
+
+        setTile(x, y, id) {
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height)
+                this.array[x + y * this.width] = id;
+        }
+    }
+
+    class TilePathFormat {
+
+    }
+
+    class MakeMapper {
+        constructor() {
+            this.formatRanges = new IntervalTree();
+            this.tileMap = new TileMap();
+        }
+
+        draw() {
+            this.tileMap.draw();
+        }
+    }
+
+    let makeMapper;
+    let img;
+    let id = 1;
+
+    function preload() {
+        img = loadImage("tile-set-test.png");
+    }
+
+    function mouseDragged() {
+        let x = mouseX / TileMap.SIZE | 0;
+        let y = mouseY / TileMap.SIZE | 0;
+        let w = img.width / TileMap.SIZE | 0;
+        if ((id / w | 0) < ((img.height * img.width) / TileMap.SIZE | 0))
+            makeMapper.tileMap.setTile(x, y, id)
+    }
+
+    mousePressed = mouseDragged;
+
+    function mouseWheel(event) {
+        if (id >= 0) {
+            id += Math.sign(event.delta);
+            if (id < 0) id = 0;
+            console.log(id);
+        }
+    }
+
+    function setup() {
+        createCanvas(320, 320);
+        makeMapper = new MakeMapper();
+    }
+
+    function draw() {
+        makeMapper.draw();
+    }
+</script>
+</body>
+</html>
