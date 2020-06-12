@@ -32,6 +32,21 @@ export default class RectBody extends AABB {
 
         let velocity = p5.Vector.mult(movement, deltaTime);
 
+        /**
+         * The issue lies there ^^^^^ since we solve for collision that will probably
+         * happen in the future (aka next frame) which makes it impossible to go through
+         * tile gaps when in motion along one axis. The way we solve collision using
+         * time relies on there being an active motion and does not account for objects
+         * that were displaced instantly. This causes collision detection to look at the
+         * tile that closes the gap before letting the player fall into the hole. Instead,
+         * there should be no knowledge of the gap closure tile until gravity was applied
+         * to the player.
+         *
+         * Solving collision using displacement calculated from the previous frame in order
+         * to simulate velocity and using collision time from the past can solve this issue
+         * since this eliminates the knowledge of the tile that closes the gap.
+         */
+
         if (velocity.x > 0) {
             deltaEntry.x = aabb.left - this.right;
             deltaExit.x = aabb.right - this.left;
