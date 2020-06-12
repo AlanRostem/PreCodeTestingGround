@@ -4,7 +4,6 @@ import Tile from "./tile.js"
 export default class Player extends Entity {
     walkSpeed = Tile.SIZE * 5;
     jumpSpeed = Tile.SIZE * 10;
-
     constructor() {
         super();
         this.body.acc.y = Tile.SIZE * 40;
@@ -13,6 +12,7 @@ export default class Player extends Entity {
     controls() {
         if (keyIsDown(65)) this.body.vel.x = -this.walkSpeed;
         if (keyIsDown(68)) this.body.vel.x = this.walkSpeed;
+        if (!keyIsDown(65) && !keyIsDown(68)) this.body.vel.x = 0;
         if (keyIsDown(16)) this.body.vel.x *= .5;
         if (keyIsDown(32)) {
             if (!this.jumping) {
@@ -22,12 +22,22 @@ export default class Player extends Entity {
         }
     }
 
-    onLeftCollision() {
-
+    onHitEntity(entity) {
+        entity.pushing = true;
     }
 
-    onRightCollision() {
+    onLeftCollision(hit) {
+        if (hit.entity !== null && !this.jumping) {
+            hit.entity.body.vel.x = this.body.vel.x /= 2;
+            hit.entity.pushing = true;
+        }
+    }
 
+    onRightCollision(hit) {
+        if (hit.entity !== null && !this.jumping) {
+            hit.entity.body.vel.x = this.body.vel.x /= 2;
+            hit.entity.pushing = true;
+        }
     }
 
     onTopCollision() {
@@ -36,7 +46,7 @@ export default class Player extends Entity {
 
     onBottomCollision() {
         this.jumping = false;
-        this.body.vel.x = 0;
+        //this.body.vel.x = 0;
         this.body.vel.y = 0;
     }
 

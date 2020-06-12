@@ -2,6 +2,7 @@ import World from "./world.js";
 import RectBody from "./rect-body.js"
 import Entity from "./entity.js"
 import Player from "./player.js"
+import Crate from "./crate.js";
 
 let world;
 let player;
@@ -23,10 +24,10 @@ window.addEventListener("keydown", e => {
 });
 
 window.mousePressed = () => {
-    world.spawnEntity(new Entity(
+    world.spawnEntity(new Crate(
         new RectBody(
             createVector(mouseX/scaleFactor, mouseY/scaleFactor),
-            createVector(16, 16))
+            createVector(8, 8))
     ));
 };
 

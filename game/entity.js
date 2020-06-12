@@ -31,7 +31,8 @@ export default class Entity {
         for (let entity of entities) {
             if (entity !== this) {
                 if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
-                    this.collisionStack.push(this.body.getSweepObject(entity.body, this.body.vel, deltaTime));
+                    this.collisionStack.push(this.body.getSweepObject(entity.body, this.body.vel, deltaTime, entity));
+                    this.onHitEntity(entity);
                 }
             }
         }
@@ -80,7 +81,7 @@ export default class Entity {
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
 
-            this.onCollision(hit.side);
+            this.onCollision(hit);
 
             stroke(0, 255, 0);
             strokeWeight(1);
@@ -92,7 +93,7 @@ export default class Entity {
                 let stack = [];
                 for (let sweep of collisionStack) {
                     if (this.body.getCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
-                        let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime);
+                        let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime, sweep.entity);
                         stack.push(newSweep);
                     }
                 }
@@ -121,18 +122,18 @@ export default class Entity {
         if (this.collisionStack.length > 0) this.collisionStack = [];
     }
 
-    onCollision(side) {
-        let entity = null;
+    onCollision(hit) {
+        let side = hit.side;
         if (side.y > 0) {
-            this.onBottomCollision(entity);
+            this.onBottomCollision(hit);
         } else if (side.y < 0) {
-            this.onTopCollision(entity);
+            this.onTopCollision(hit);
         }
 
         if (side.x < 0) {
-            this.onLeftCollision(entity);
+            this.onLeftCollision(hit);
         } else if (side.x > 0) {
-            this.onRightCollision(entity);
+            this.onRightCollision(hit);
         }
     }
 
@@ -145,5 +146,9 @@ export default class Entity {
         noStroke();
         fill(this.color);
         rect(this.body.center.x, this.body.center.y, this.body.extents.x * 2, this.body.extents.y * 2);
+    }
+
+    onHitEntity(entity) {
+
     }
 }

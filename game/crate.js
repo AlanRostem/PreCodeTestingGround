@@ -1,0 +1,19 @@
+import Entity from "./entity.js";
+import Tile from "./tile.js";
+
+export default class Crate extends Entity {
+    pushing = false;
+    update(world, deltaTime) {
+        this.body.acc.y = Tile.SIZE * 10;
+        super.update(world, deltaTime);
+    }
+
+    onBottomCollision(entity) {
+        this.body.vel.y = 0;
+        if (!this.pushing) {
+            this.body.vel.x = 0;
+        } else {
+            this.pushing = false;
+        }
+    }
+}

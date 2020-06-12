@@ -35,7 +35,7 @@ export default class RectBody extends AABB {
         return collisionBoundary;
     }
 
-    getSweepObject(aabb, movement, deltaTime) {
+    getSweepObject(aabb, movement, deltaTime, entity = null) {
         let deltaEntry = createVector(0, 0);
         let deltaExit = createVector(0, 0);
 
@@ -142,7 +142,7 @@ export default class RectBody extends AABB {
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(aabb, resultTime, normal, side);
+        return new Sweep(aabb, entity, resultTime, normal, side);
     }
 
     update(world, deltaTime) {
