@@ -8,6 +8,11 @@ export default class Crate extends Entity {
         super.update(world, deltaTime);
     }
 
+    push(xVel) {
+        this.body.vel.x = xVel;
+        this.pushing = true;
+    }
+
     onBottomCollision(entity) {
         this.body.vel.y = 0;
         if (!this.pushing) {

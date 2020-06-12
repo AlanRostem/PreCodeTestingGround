@@ -24,15 +24,13 @@ export default class Player extends Entity {
 
     onLeftCollision(hit) {
         if (hit.entity !== null && !this.jumping) {
-            hit.entity.body.vel.x = this.body.vel.x /= 2;
-            hit.entity.pushing = true;
+            hit.entity.push(this.body.vel.x /= 2);
         }
     }
 
     onRightCollision(hit) {
         if (hit.entity !== null && !this.jumping) {
-            hit.entity.body.vel.x = this.body.vel.x /= 2;
-            hit.entity.pushing = true;
+            hit.entity.push(this.body.vel.x /= 2);
         }
     }
 
