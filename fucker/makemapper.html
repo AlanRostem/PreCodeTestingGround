@@ -137,8 +137,8 @@
                         stroke(0);
                         rect(pos.x, pos.y, TileMap.SIZE, TileMap.SIZE);
                     }
-                    stroke(255);
-                    text(id, pos.x + TileMap.SIZE / 2 - 3, pos.y + TileMap.SIZE / 2 + 3)
+                    //stroke(255);
+                    //text(id, pos.x + TileMap.SIZE / 2 - 3, pos.y + TileMap.SIZE / 2 + 3)
                 }
         }
 
@@ -174,7 +174,7 @@
             const TILES_PER_ROW = img.width / Tile.SIZE | 0;
             const x = caseIndex % TilePathFormat.TYPE_OFFSET;
             const y = caseIndex / TilePathFormat.TYPE_OFFSET | 0;
-            return x + TILES_PER_ROW * y + (this.getTileType(tile) - 1) * TilePathFormat.TYPE_OFFSET;
+            return x + 1 + TILES_PER_ROW * y + (this.getTileType(tile) - 1) * TilePathFormat.TYPE_OFFSET;
         }
 
         createCase(id, _case) {
@@ -204,8 +204,8 @@
                 for (let y = 0; y < 3; y++) {
                     let xx = px + x - 1;
                     let yy = py + y - 1;
-                    id = this.getTileByOffsetAndType(_case[x + 3 * y], id);
-                    makeMapper.tileMap.setTile(xx, yy, id);
+                    let tile = this.getTileByOffsetAndType(_case[x + 3 * y], id);
+                    makeMapper.tileMap.setTile(xx, yy, tile);
                 }
         }
     }
