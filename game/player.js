@@ -6,10 +6,10 @@ export default class Player extends Entity {
     static _ = (() => {
         CollisionEventHandler.createCollisionScenario("PlayerVsCrate", {
             "left": (player, crate, deltaTime) => {
-                crate.push(player.body.vel.x /= 2);
+                if (!player.jumping) crate.push(player.body.vel.x /= 2);
             },
             "right": (player, crate, deltaTime) => {
-                crate.push(player.body.vel.x /= 2);
+                if (!player.jumping) crate.push(player.body.vel.x /= 2);
             }
         });
     })();
