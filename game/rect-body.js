@@ -75,7 +75,7 @@ export default class RectBody extends AABB {
 
         let resultTime = 1;
         let normal = createVector();
-        let side = createVector();
+        let side = "";
 
         if (!(maxEntryTime > minExitTime ||
             (entryTime.x < 0 && entryTime.y < 0)
@@ -85,10 +85,12 @@ export default class RectBody extends AABB {
             resultTime = maxEntryTime;
             if (entryTime.x < entryTime.y) {
                 normal = createVector(Math.sign(deltaEntry.x), 0);
-                side.y = Math.sign(velocity.y);
+                if (velocity.y > 0) side = "bottom";
+                else if (velocity.y < 0) side = "top";
             } else if (entryTime.x > entryTime.y) {
                 normal = createVector(0, Math.sign(deltaEntry.y));
-                side.x = Math.sign(velocity.x);
+                if (velocity.x > 0) side = "right";
+                else if (velocity.x < 0) side = "left";
             } else {
                 // Problem: Both axes have equal intersection depth (direct and perfect corner collision).
                 // We need to use the velocity to determine the correct collision normal
@@ -97,10 +99,12 @@ export default class RectBody extends AABB {
                 // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
                 if (absVel.x > absVel.y) {
                     normal = createVector(Math.sign(velocity.x), 0);
-                    side.y = Math.sign(velocity.y);
+                    if (velocity.y > 0) side = "bottom";
+                    else if (velocity.y < 0) side = "top";
                 } else if (absVel.x < absVel.y) {
                     normal = createVector(0, Math.sign(velocity.y));
-                    side.x = Math.sign(velocity.x);
+                    if (velocity.x > 0) side = "right";
+                    else if (velocity.x < 0) side = "left";
                 }
 
                 /**

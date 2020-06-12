@@ -1,6 +1,8 @@
 import RectBody from "./rect-body.js";
 import Tile from "./tile.js";
 import AABB from "./aabb.js";
+import EventSubscriptionSet from "./event-subscription-set.js";
+import CollisionEventHandler from "./collision-event-handler.js";
 
 export default class Entity {
     constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(
@@ -9,6 +11,17 @@ export default class Entity {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
+        this.applyingCollisionSubs = new EventSubscriptionSet();
+        this.receivingCollisionSubs = new EventSubscriptionSet();
+    }
+
+    subscribeToApplyingCollisionEvent(event) {
+        this.applyingCollisionSubs.add(event);
+    }
+
+
+    subscribeToReceivingCollisionEvent(event) {
+        this.receivingCollisionSubs.add(event);
     }
 
     onTopCollision(entity) {
@@ -82,6 +95,8 @@ export default class Entity {
             hit.normal.mult(dotProduct);
 
             this.onCollision(hit);
+            if (hit.entity !== null)
+                CollisionEventHandler.postCollisionEvents(this, hit, deltaTime);
 
             stroke(0, 255, 0);
             strokeWeight(1);
@@ -124,16 +139,19 @@ export default class Entity {
 
     onCollision(hit) {
         let side = hit.side;
-        if (side.y > 0) {
-            this.onBottomCollision(hit);
-        } else if (side.y < 0) {
-            this.onTopCollision(hit);
-        }
 
-        if (side.x < 0) {
-            this.onLeftCollision(hit);
-        } else if (side.x > 0) {
-            this.onRightCollision(hit);
+        switch (side) {
+            case "top":
+                this.onTopCollision();
+                break;
+            case "bottom":
+                this.onBottomCollision();
+                break;
+            case "left":
+                this.onLeftCollision();
+                break;
+            case "right":
+                this.onRightCollision();
         }
     }
 

@@ -6,6 +6,7 @@ export default class Crate extends Entity {
     update(world, deltaTime) {
         this.body.acc.y = Tile.SIZE * 40;
         super.update(world, deltaTime);
+        this.subscribeToReceivingCollisionEvent("PlayerVsCrate");
     }
 
     push(xVel) {

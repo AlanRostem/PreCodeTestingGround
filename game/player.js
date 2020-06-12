@@ -1,12 +1,25 @@
 import Entity from "./entity.js"
 import Tile from "./tile.js"
+import CollisionEventHandler from "./collision-event-handler.js";
 
 export default class Player extends Entity {
+    static _ = (() => {
+        CollisionEventHandler.createCollisionScenario("PlayerVsCrate", {
+            "left": (player, crate, deltaTime) => {
+                crate.push(player.body.vel.x /= 2);
+            },
+            "right": (player, crate, deltaTime) => {
+                crate.push(player.body.vel.x /= 2);
+            }
+        });
+    })();
+
     walkSpeed = Tile.SIZE * 5;
     jumpSpeed = Tile.SIZE * 10;
     constructor() {
         super();
         this.body.acc.y = Tile.SIZE * 40;
+        this.subscribeToApplyingCollisionEvent("PlayerVsCrate");
     }
 
     controls() {
@@ -22,16 +35,12 @@ export default class Player extends Entity {
         }
     }
 
-    onLeftCollision(hit) {
-        if (hit.entity !== null && !this.jumping) {
-            hit.entity.push(this.body.vel.x /= 2);
-        }
+    onLeftCollision() {
+
     }
 
-    onRightCollision(hit) {
-        if (hit.entity !== null && !this.jumping) {
-            hit.entity.push(this.body.vel.x /= 2);
-        }
+    onRightCollision() {
+
     }
 
     onTopCollision() {
