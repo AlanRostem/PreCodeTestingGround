@@ -3,14 +3,29 @@ import Tile from "./tile.js";
 import AABB from "./aabb.js";
 import EventSubscriptionSet from "./event-subscription-set.js";
 import CollisionEventHandler from "./collision-event-handler.js";
+import EntityEventHandler from "./entity-event-handler.js";
 
 export default class Entity {
+    static _ = (() => {
+        EntityEventHandler.createRelation("PhysicalVsPhysical",
+            (e0, e1, dt) => e0.body.getCollisionBoundary(dt).overlaps(e1.body),
+            (e0, e1, dt) => e0.collisionStack.push(e0.body.getSweepObject(e1.body, e0.body.vel, dt, e1))
+        );
+    })();
+
     constructor(body = new RectBody(createVector(Tile.SIZE * 10 - 8, Tile.SIZE * 15 - 8), createVector(
         Tile.SIZE / 2,
         Tile.SIZE / 2))) {
         this.color = color(255, random(255), random(255));
         this.body = body;
         this.collisionStack = [];
+
+        this.applyingRelationSubs = new EventSubscriptionSet();
+        this.receivingRelationSubs = new EventSubscriptionSet();
+
+        this.subscribeToApplyingRelation("PhysicalVsPhysical");
+        this.subscribeToReceivingRelation("PhysicalVsPhysical");
+
         this.applyingCollisionSubs = new EventSubscriptionSet();
         this.receivingCollisionSubs = new EventSubscriptionSet();
     }
@@ -22,6 +37,15 @@ export default class Entity {
 
     subscribeToReceivingCollisionEvent(event) {
         this.receivingCollisionSubs.add(event);
+    }
+
+    subscribeToApplyingRelation(event) {
+        this.applyingRelationSubs.add(event);
+    }
+
+
+    subscribeToReceivingRelation(event) {
+        this.receivingRelationSubs.add(event);
     }
 
     onTopCollision(entity) {
@@ -43,9 +67,7 @@ export default class Entity {
     scanEntities(entities, deltaTime) {
         for (let entity of entities) {
             if (entity !== this) {
-                if (this.body.getCollisionBoundary(deltaTime).overlaps(entity.body)) {
-                    this.collisionStack.push(this.body.getSweepObject(entity.body, this.body.vel, deltaTime, entity));
-                }
+                EntityEventHandler.postRelationEvents(this, entity, deltaTime);
             }
         }
     }
