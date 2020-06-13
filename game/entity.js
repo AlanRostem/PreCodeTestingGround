@@ -99,7 +99,7 @@ export default class Entity {
             strokeWeight(1);
             rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
-            text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
+            // text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
 
             if (time > 0) {
                 let stack = [];
