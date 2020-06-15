@@ -101,6 +101,12 @@ export default class Entity {
     // Resolve all possible collisions
     checkCollision(deltaTime, movement = this.body.vel, remainingTime = 1, collisionStack = this.collisionStack, count = 0) {
         collisionStack.sort((a, b) => a.collisionTime - b.collisionTime);
+        /**
+         * Issue ^^^^ here: Apparently after testing using the "crates pushing on top of other
+         * crates" feature it seems that the collision stack doesn't sort correctly for the
+         * most likely collision. There may be an issue in how we calculate the collision
+         * time, sorting of the stack or the broad-phasing we use to detect collisions. 
+         */
 
         let hit = collisionStack.shift();
 
