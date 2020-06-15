@@ -122,7 +122,7 @@ export default class Entity {
             rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
             fill(this.color);
-            //text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
+            text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
             noFill();
             if (time > 0) {
                 let stack = [];
