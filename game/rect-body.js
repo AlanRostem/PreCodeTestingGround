@@ -4,6 +4,7 @@ import Sweep from "./sweep.js"
 export default class RectBody extends AABB {
     vel = createVector();
     acc = createVector();
+    old = createVector();
 
     getCollisionBoundary(deltaTime, movement = this.vel) {
         let collisionBoundary = new AABB(this.center.copy(), this.extents.copy());
@@ -155,7 +156,12 @@ export default class RectBody extends AABB {
         return new Sweep(aabb, entity, resultTime, normal, side);
     }
 
+    get displacement() {
+        return this.center.copy().sub(this.old);
+    }
+
     update(world, deltaTime) {
+        this.old = this.center.copy();
         this.vel.add(p5.Vector.mult(this.acc, deltaTime));
     }
 };

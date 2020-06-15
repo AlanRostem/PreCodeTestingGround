@@ -6,10 +6,15 @@ export default class Crate extends Entity {
     static _ = (() => {
         CollisionEventHandler.createCollisionScenario("CrateVsCrate", {
             "left": (self, crate, deltaTime) => {
-                if (Math.abs(self.body.vel.x) > Math.abs(crate.body.vel.x)) crate.push(self.body.vel.x /= 2);
+                //if (Math.abs(self.body.vel.x) > Math.abs(crate.body.vel.x))
+                    crate.push(self.body.vel.x /= 2);
             },
             "right": (self, crate, deltaTime) => {
-                if (Math.abs(self.body.vel.x) > Math.abs(crate.body.vel.x)) crate.push(self.body.vel.x /= 2);
+                //if (Math.abs(self.body.vel.x) > Math.abs(crate.body.vel.x))
+                    crate.push(self.body.vel.x /= 2);
+            },
+            "bottom": (self, crate, deltaTime) => {
+                self.push(crate.body.displacement.x / deltaTime);
             }
         });
     })();

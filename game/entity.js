@@ -108,7 +108,6 @@ export default class Entity {
         if (hit) {
             this.body.center.x += movement.x * hit.collisionTime * deltaTime;// - Math.sign(movement.x) * AABB.EPSILON;
             this.body.center.y += movement.y * hit.collisionTime * deltaTime;// - Math.sign(movement.y) * AABB.EPSILON;
-
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
