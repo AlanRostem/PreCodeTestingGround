@@ -153,7 +153,7 @@ export default class RectBody extends AABB {
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(aabb, entity, resultTime, normal, side);
+        return new Sweep(aabb, entity, resultTime, normal, side, this.center.copy().sub(aabb.center).magSq());
     }
 
     get displacement() {

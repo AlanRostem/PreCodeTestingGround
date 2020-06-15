@@ -4,6 +4,8 @@
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/sweep.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/sweep.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,5 +122,16 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1591833190312" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/game/entity.js</url>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
