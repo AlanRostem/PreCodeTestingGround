@@ -105,7 +105,7 @@ export default class Entity {
          * Issue ^^^^ here: Apparently after testing using the "crates pushing on top of other
          * crates" feature it seems that the collision stack doesn't sort correctly for the
          * most likely collision. There may be an issue in how we calculate the collision
-         * time, sorting of the stack or the broad-phasing we use to detect collisions. 
+         * time, sorting of the stack or the broad-phasing we use to detect collisions.
          */
 
         let hit = collisionStack.shift();
@@ -126,8 +126,9 @@ export default class Entity {
             strokeWeight(1);
             rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
-            // text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
-
+            fill(this.color);
+            text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
+            noFill()
             if (time > 0) {
                 let stack = [];
                 for (let sweep of collisionStack) {
