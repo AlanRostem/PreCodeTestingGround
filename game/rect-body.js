@@ -113,7 +113,7 @@ export default class RectBody extends AABB {
                 let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
 
                 // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
-                if (absVel.x > absVel.y) {
+                if (absVel.x >= absVel.y) {
                     normal = createVector(Math.sign(velocity.x), 0);
                     if (velocity.y > 0) side = "bottom";
                     else if (velocity.y < 0) side = "top";
