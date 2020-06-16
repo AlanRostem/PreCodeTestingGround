@@ -144,9 +144,9 @@ export default class Entity {
         this.scanEntities(world.entities, deltaTime);
         this.scanTiles(world.tileMap, deltaTime);
         for (let e of this.collisionStack) {
-            stroke(255, 255, 255, 100);
-            noFill();
-            rect(e.aabb.center.x, e.aabb.center.y, e.aabb.extents.x * 2, e.aabb.extents.y * 2);
+            //stroke(255, 255, 255, 100);
+            //noFill();
+            //rect(e.aabb.center.x, e.aabb.center.y, e.aabb.extents.x * 2, e.aabb.extents.y * 2);
         }
         stroke(255, 0, 0);
         line(this.body.center.x, this.body.center.y,
