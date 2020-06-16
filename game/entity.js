@@ -182,6 +182,6 @@ export default class Entity {
         rectMode(CENTER);
         noStroke();
         fill(this.color);
-        rect(Math.round(this.body.center.x), Math.round(this.body.center.y), this.body.extents.x * 2, this.body.extents.y * 2);
+        rect(this.body.center.x, this.body.center.y, this.body.extents.x * 2, this.body.extents.y * 2);
     }
 }
