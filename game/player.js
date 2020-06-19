@@ -23,6 +23,7 @@ export default class Player extends Entity {
     }
 
     controls() {
+        if (keyIsDown(87)) this.body.vel.y = -this.jumpSpeed;
         if (keyIsDown(65)) this.body.vel.x = -this.walkSpeed;
         if (keyIsDown(68)) this.body.vel.x = this.walkSpeed;
         if (!keyIsDown(65) && !keyIsDown(68) && !this.jumping) this.body.vel.x = 0;

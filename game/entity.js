@@ -112,18 +112,17 @@ export default class Entity {
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
-
             this.onCollision(hit);
             if (hit.entity !== null)
                 CollisionEventHandler.postCollisionEvents(this, hit, deltaTime);
 
-            stroke(0, 255, 0);
-            strokeWeight(1);
-            rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
+            //stroke(0, 255, 0);
+            //strokeWeight(1);
+            //rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
 
-            fill(this.color);
-            text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
-            noFill();
+            //fill(this.color);
+            //text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
+            //noFill();
             if (time > 0) {
                 let stack = [];
                 for (let sweep of collisionStack) {
@@ -145,9 +144,9 @@ export default class Entity {
         this.scanEntities(world.entities, deltaTime);
         this.scanTiles(world.tileMap, deltaTime);
         for (let e of this.collisionStack) {
-            stroke(255, 255, 255, 100);
-            noFill();
-            rect(e.aabb.center.x, e.aabb.center.y, e.aabb.extents.x * 2, e.aabb.extents.y * 2);
+            //stroke(255, 255, 255, 100);
+            //noFill();
+            //rect(e.aabb.center.x, e.aabb.center.y, e.aabb.extents.x * 2, e.aabb.extents.y * 2);
         }
         stroke(255, 0, 0);
         line(this.body.center.x, this.body.center.y,
@@ -177,9 +176,9 @@ export default class Entity {
 
     draw() {
         let e = this.body.getCollisionBoundary(deltaTime / 1000);
-        noFill();
-        stroke(255, 0, 0);
-        rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
+        //noFill();
+        //stroke(255, 0, 0);
+        //rect(e.center.x, e.center.y, e.extents.x * 2, e.extents.y * 2);
         rectMode(CENTER);
         noStroke();
         fill(this.color);
