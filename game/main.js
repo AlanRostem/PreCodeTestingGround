@@ -6,10 +6,10 @@ import Crate from "./crate.js";
 
 let world;
 let player;
-const scaleFactor = 2;
+const scaleFactor = 1;
 
 window.setup = () => {
-    createCanvas(640, 640);
+    createCanvas(320, 320);
     world = new World;
 
     world.spawnEntity(window.player = player = new Player());
