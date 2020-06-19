@@ -9,7 +9,8 @@ let player;
 const scaleFactor = 1;
 
 window.setup = () => {
-    createCanvas(320, 320);
+    let cv = createCanvas(320, 320);
+    cv.canvas.style.imageRendering = "pixelated";
     world = new World;
 
     world.spawnEntity(window.player = player = new Player());
