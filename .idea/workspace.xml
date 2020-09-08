@@ -2,27 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/aabb.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/collision-event-handler.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/crate.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/entity-event-handler.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/entity.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/event-subscription-set.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/player.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/rect-body.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/sweep.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/tile-map.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/tile.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/min_maate_men_bedre/world.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fucker/makemapper.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fucker/tile-set-test.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/rect-body.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/rect-body.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/sweep.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/sweep.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/tile-map.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/tile-map.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +97,7 @@
       <workItem from="1591729001784" duration="1774000" />
       <workItem from="1591800901821" duration="617000" />
       <workItem from="1591971124991" duration="15640000" />
-      <workItem from="1599558502328" duration="9863000" />
+      <workItem from="1599558502328" duration="13280000" />
     </task>
     <servers />
   </component>

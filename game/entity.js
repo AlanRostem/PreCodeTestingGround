@@ -112,9 +112,12 @@ export default class Entity {
             let time = remainingTime - hit.collisionTime;
             let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
             hit.normal.mult(dotProduct);
+
             this.onCollision(hit);
             if (hit.entity !== null)
                 CollisionEventHandler.postCollisionEvents(this, hit, deltaTime);
+
+            this.body.center.add(hit.normal.mult(time * deltaTime));
 
             function highlight(box, c = color(0, 255, 0)) {
                 stroke(c);
@@ -126,6 +129,7 @@ export default class Entity {
             highlight(hit.aabb);
 
             if (time > 0) {
+                /*
                 let stack = [];
                 for (let sweep of collisionStack) {
                     fill(255);
@@ -137,6 +141,7 @@ export default class Entity {
                 }
                 // Keep resolving collisions for the other potential collisions
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
+                 */
             }
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime));
