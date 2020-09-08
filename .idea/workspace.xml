@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/stackoverflow_demo.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/aabb.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/aabb.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stackoverflow_demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/stackoverflow_demo.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,15 +46,19 @@
       <recent name="C:\Dev\PreCodeTestingGround\swept-minkowski" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.index.html">
+  <component name="RunManager" selected="JavaScript Debug.stackoverflow_demo.html">
     <configuration name="dritt.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/PreCodeTestingGround/dritt.html" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/PreCodeTestingGround/game/index.html" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
+    <configuration name="stackoverflow_demo.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/PreCodeTestingGround/stackoverflow_demo.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JavaScript Debug.stackoverflow_demo.html" />
         <item itemvalue="JavaScript Debug.index.html" />
         <item itemvalue="JavaScript Debug.dritt.html" />
       </list>
@@ -100,7 +101,7 @@
       <workItem from="1591729001784" duration="1774000" />
       <workItem from="1591800901821" duration="617000" />
       <workItem from="1591971124991" duration="15640000" />
-      <workItem from="1599558502328" duration="17362000" />
+      <workItem from="1599558502328" duration="18690000" />
     </task>
     <servers />
   </component>
