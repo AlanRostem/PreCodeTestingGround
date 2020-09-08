@@ -8,25 +8,35 @@
 <body>
 <script>
     const epsilon = 0;
-    const tileSize = 32;
+    const tileSize = 16;
     let mapSize;
     let tileMap;
     let player;
 
     function setup() {
         createCanvas(320, 320);
-        mapSize = createVector(10, 10);
+        mapSize = createVector(20, 20);
         tileMap = [
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 1, 1, 1, 0, 1, 1, 1, 0, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
         player = new Player();
     }
@@ -122,7 +132,7 @@
         // Returns an AABB object with the position of the player, but it's size
         // is the player's size plus the player's velocity in its respective direction.
         // This will be used in my broad-phasing (yes, it can be optimized).
-        createCollisionBoundary(deltaTime, movement = this.vel) {
+        createMovementBoundary(deltaTime, movement = this.vel) {
             let collisionBoundary = new AABB(this.center.copy(), this.extents.copy()); // Copy the player's shape
             let vel = p5.Vector.mult(movement, deltaTime); // Constrain the movement vector to frame time
             if (vel.x > 0) {
@@ -242,7 +252,7 @@
         // resolution (this makes the code extensible for different
         // uses like moving objects in a spatial grid).
         tileMapBroadPhase(deltaTime) {
-            let bounds = this.createCollisionBoundary(deltaTime);
+            let bounds = this.createMovementBoundary(deltaTime);
             let centralTile = createVector( // Translate world position to tile grid position
                 Math.floor(this.center.x / tileSize),
                 Math.floor(this.center.y / tileSize),
@@ -302,7 +312,8 @@
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
                     for (let sweep of collisionStack) {
-                        if (this.createCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
+                        // Pass the normal vector as the movement vector for the next possible collision
+                        if (this.createMovementBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
                             let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
                             stack.push(newSweep);
                         }
@@ -324,7 +335,7 @@
                     break;
                 case "left":
                 case "right":
-                    //this.vel.x = 0;
+                    this.vel.x = 0;
                     break;
             }
         }
