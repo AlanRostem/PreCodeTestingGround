@@ -7,7 +7,6 @@
 </head>
 <body>
 <script>
-    const epsilon = 0;
     const tileSize = 16;
     let mapSize;
     let tileMap;
@@ -17,6 +16,10 @@
         createCanvas(320, 320);
         mapSize = createVector(20, 20);
         tileMap = [
+            // Tile map array represented as a 2D array using the map
+            // width as a stride for indexing it correctly. Feel free
+            // to edit this to structure your own testing ground. 0 is
+            // empty space and 1 or above is a solid tile.
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -38,6 +41,7 @@
             1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
+
         player = new Player();
     }
 
@@ -342,16 +346,19 @@
 
         controls() {
             const speed = 100;
-            if (keyIsDown(65)) this.vel.x = -speed;
-            if (keyIsDown(68)) this.vel.x = speed;
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
+
+            // Stop movement if no input is specified
             if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
 
-            if (keyIsDown(32)) {
+            if (keyIsDown(32)) { // Press space to fly
                 this.vel.y = -speed;
             }
         }
 
         update(deltaTime) {
+            // Apply constant gravity
             this.vel.y += 500 * deltaTime;
             this.controls();
             this.tileMapBroadPhase(deltaTime);
