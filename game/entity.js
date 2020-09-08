@@ -116,17 +116,21 @@ export default class Entity {
             if (hit.entity !== null)
                 CollisionEventHandler.postCollisionEvents(this, hit, deltaTime);
 
-            //stroke(0, 255, 0);
-            //strokeWeight(1);
-            //rect(hit.aabb.center.x, hit.aabb.center.y, hit.aabb.extents.x * 2, hit.aabb.extents.y * 2);
+            function highlight(box, c = color(0, 255, 0)) {
+                stroke(c);
+                strokeWeight(1);
+                rect(box.center.x, box.center.y, box.extents.x * 2, box.extents.y * 2);
+                noFill();
+            }
 
-            //fill(this.color);
-            //text("" + count, hit.aabb.center.x - 3, hit.aabb.center.y + 3);
-            //noFill();
+            highlight(hit.aabb);
+
             if (time > 0) {
                 let stack = [];
                 for (let sweep of collisionStack) {
-                    if (this.body.getCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
+                    fill(255);
+                    highlight(sweep.aabb, color(255));
+                    if (this.body.getCollisionBoundary(deltaTime, hit.normal.copy().add(1)).overlaps(sweep.aabb)) {
                         let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime, sweep.entity);
                         stack.push(newSweep);
                     }

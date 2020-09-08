@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bæsj</title>
+</head>
+<body>
+<script>
+    const output = document.createElement("div");
+    document.body.appendChild(output);
+
+    const collectionToString = function () {
+        let str = "[";
+        for (let e of this) {
+            str += e.toString();
+            if (this.indexOf(e) !== this.length - 1) str += ", ";
+        }
+        return str + "]";
+    };
+
+    Array.prototype.toString = collectionToString;
+    Set.prototype.toString = collectionToString;
+
+    function print(...stuff) {
+        const data = document.createElement("p");
+        for (let thing of stuff) {
+            data.innerHTML += thing.toString() + " "
+        }
+        output.appendChild(data);
+    }
+
+    for (let i = 1; i <= 12; i++) {
+        let s1 = Math.ceil(Math.random() * 24);
+        let s2 = Math.ceil(Math.random() * 24);
+        if ((s1 - s2) % 11 === 0)
+            print(s1,"-", s2, "=", s1-s2)
+    }
+
+</script>
+</body>
+</html>

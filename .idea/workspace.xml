@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/dritt.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/entity.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/entity.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/tile-map.js" beforeDir="false" afterPath="$PROJECT_DIR$/game/tile-map.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,8 +16,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -44,6 +47,20 @@
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Dev\Web\PreCodeTestingGround\makmapper" />
     </key>
+  </component>
+  <component name="RunManager" selected="JavaScript Debug.index.html">
+    <configuration name="dritt.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/PreCodeTestingGround/dritt.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/PreCodeTestingGround/game/index.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.index.html" />
+        <item itemvalue="JavaScript Debug.dritt.html" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -82,6 +99,7 @@
       <workItem from="1591729001784" duration="1774000" />
       <workItem from="1591800901821" duration="617000" />
       <workItem from="1591971124991" duration="15640000" />
+      <workItem from="1599558502328" duration="7334000" />
     </task>
     <servers />
   </component>
@@ -116,10 +134,10 @@
     </option>
   </component>
   <component name="WindowStateProjectService">
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1591833190312">
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1599483626554">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1591833190312" />
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1599483626554" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

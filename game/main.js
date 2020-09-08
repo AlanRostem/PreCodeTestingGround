@@ -6,10 +6,12 @@ import Crate from "./crate.js";
 
 let world;
 let player;
-const scaleFactor = 1;
+const scaleFactor = 3;
+
+document.body.style.margin = "0";
 
 window.setup = () => {
-    let cv = createCanvas(320, 320);
+    let cv = createCanvas(960, 960);
     cv.canvas.style.imageRendering = "pixelated";
     world = new World;
 
