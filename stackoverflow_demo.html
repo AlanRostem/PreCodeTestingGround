@@ -96,7 +96,7 @@
 
     // Simple struct that will hold data about a given swept collision detection
     class SweepData {
-        constructor(aabb, collisionTime = 1, normal = createVector(0, 0), side = createVector(0, 0), distance) {
+        constructor(aabb, collisionTime, normal, side, distance) {
             this.aabb = aabb;
             this.collisionTime = collisionTime;
             this.normal = normal;
@@ -261,6 +261,7 @@
                         createVector(xx * tileSize + tileSize / 2, yy * tileSize + tileSize / 2),
                         createVector(tileSize / 2, tileSize / 2)
                     );
+
                     if (// Check map constraints and tile solidity
                         xx < 0 || xx >= mapSize.x ||
                         yy < 0 || yy >= mapSize.y ||
@@ -274,12 +275,10 @@
         }
 
         resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
-
             // Sort collisions in the correct order: First by distance, then by
             // time of impact to correct the order a bit.
             collisionStack.sort((a, b) => a.distance - b.distance);
             collisionStack.sort((a, b) => a.collisionTime - b.collisionTime);
-
             let hit = collisionStack.shift();
 
             // If a collision is detected at all, resolve for the closest AABB. Otherwise add velocity to position.
@@ -346,6 +345,7 @@
             this.controls();
             this.tileMapBroadPhase(deltaTime);
             this.resolveCollisionOrMove(deltaTime);
+            this.collisionStack = [];
         }
 
         draw() {
@@ -357,7 +357,10 @@
     }
 
     addEventListener("keydown", e => {
-        e.preventDefault();
+        switch (e.keyCode) {
+            case 32:
+                e.preventDefault();
+        }
     })
 
 </script>
