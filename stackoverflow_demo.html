@@ -264,7 +264,7 @@
                     if (// Check map constraints and tile solidity
                         xx < 0 || xx >= mapSize.x ||
                         yy < 0 || yy >= mapSize.y ||
-                        tileMap[xx + yy * mapSize.x]=== 0
+                        tileMap[xx + yy * mapSize.x] === 0
                         || !bounds.overlaps(tile)
                     ) continue;
 
@@ -300,7 +300,7 @@
 
                 if (time > 0) {
                     // If the time of impact happened to be above zero, then recalculate
-                    // collision for all other potential collisions
+                    // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
                     for (let sweep of collisionStack) {
                         if (this.createCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
