@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swept AABB Collision Question</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+</head>
+<body>
+<script>
+    const epsilon = 0;
+    const tileSize = 32;
+    let mapSize;
+    let tileMap;
+
+    function setup() {
+        createCanvas(320, 320);
+        mapSize = createVector(10, 10);
+        tileMap = [
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 0, 1, 1, 0, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        ];
+    }
+
+    function draw() {
+
+        // Draw the tile-map
+        for (let y = 0; y < mapSize.y; y++)
+            for (let x = 0; x < mapSize.x; x++) {
+                if (tileMap[x + y * mapSize.x] !== 0) {
+                    fill(100, 50, 150);
+                    rect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+    }
+
+    // Bounding box class with a central position
+    class AABB {
+        constructor(center, extents) {
+            this.center = center;
+            this.extents = extents;
+        }
+
+        overlaps(aabb) {
+            return this.left < aabb.right &&
+                this.right > aabb.left &&
+                this.top < aabb.bottom &&
+                this.bottom > aabb.top;
+        }
+
+        get top() {
+            return this.center.y - this.extents.y;
+        }
+
+        set top(y) {
+            this.center.y = y + this.extents.y;
+        }
+
+        get bottom() {
+            return this.center.y + this.extents.y;
+        }
+
+        set bottom(y) {
+            this.center.y = y - this.extents.y;
+        }
+
+        get left() {
+            return this.center.x - this.extents.x;
+        }
+
+        set left(x) {
+            this.center.x = x + this.extents.x;
+        }
+
+        get right() {
+            return this.center.x + this.extents.x;
+        }
+
+        set right(x) {
+            this.center.x = x - this.extents.x;
+        }
+    }
+
+    // Simple struct that will hold data about a given swept collision detection
+    class SweepData {
+        constructor(aabb, collisionTime = 1, normal = createVector(0, 0), side = createVector(0, 0), distance) {
+            this.aabb = aabb;
+            this.collisionTime = collisionTime;
+            this.normal = normal;
+            this.side = side;
+            this.distance = distance;
+        }
+    }
+
+    // Basic class for a controllable character that can move
+    // and collide with the environment. All collision resolution
+    // logic for this demo will occur here.
+    class Player extends AABB {
+        vel = createVector(0, 0); // Velocity component (starts at zero)
+        collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
+        constructor() {
+            super(
+                createVector(width / 2, height / 2), // Place the player at the center of the screen
+                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+            );
+        }
+
+        // Returns an AABB object with the position of the player, but it's size
+        // is the player's size plus the player's velocity in its respective direction.
+        // This will be used in my broad-phasing (yes, it can be optimized).
+        createCollisionBoundary(deltaTime, movement = this.vel) {
+            let collisionBoundary = new AABB(this.center.copy(), this.extents.copy()); // Copy the player's shape
+            let vel = p5.Vector.mult(movement, deltaTime); // Constrain the movement vector to frame time
+            if (vel.x > 0) {
+                collisionBoundary.extents.x = this.extents.x + vel.x;
+                collisionBoundary.left = this.left;
+            } else {
+                collisionBoundary.extents.x = this.extents.x - vel.x;
+                collisionBoundary.right = this.right;
+            }
+
+            if (vel.y > 0) {
+                collisionBoundary.extents.y = this.extents.y + vel.y;
+                collisionBoundary.top = this.top;
+            } else {
+                collisionBoundary.extents.y = this.extents.y - vel.y;
+                collisionBoundary.bottom = this.bottom;
+            }
+            return collisionBoundary;
+        }
+
+        calculateSweepData(aabb, movement, deltaTime) {
+            let deltaEntry = createVector(0, 0);
+            let deltaExit = createVector(0, 0);
+
+            let velocity = p5.Vector.mult(movement, deltaTime);
+
+            if (velocity.x > 0) {
+                deltaEntry.x = aabb.left - this.right;
+                deltaExit.x = aabb.right - this.left;
+            } else {
+                deltaEntry.x = aabb.right - this.left;
+                deltaExit.x = aabb.left - this.right;
+            }
+
+            if (velocity.y > 0) {
+                deltaEntry.y = aabb.top - this.bottom;
+                deltaExit.y = aabb.bottom - this.top;
+            } else {
+                deltaEntry.y = aabb.bottom - this.top;
+                deltaExit.y = aabb.top - this.bottom;
+            }
+
+            let entryTime = createVector(0, 0);
+            let exitTime = createVector(0, 0);
+
+            if (velocity.x === 0) {
+                entryTime.x = -Infinity;
+                exitTime.x = Infinity;
+            } else {
+                entryTime.x = deltaEntry.x / velocity.x;
+                exitTime.x = deltaExit.x / velocity.x;
+            }
+
+            if (velocity.y === 0) {
+                entryTime.y = -Infinity;
+                exitTime.y = Infinity;
+            } else {
+                entryTime.y = deltaEntry.y / velocity.y;
+                exitTime.y = deltaExit.y / velocity.y;
+            }
+
+            if (entryTime.y > 1) entryTime.y = -Infinity;
+            if (entryTime.x > 1) entryTime.x = -Infinity;
+
+            let maxEntryTime = Math.max(entryTime.x, entryTime.y);
+            let minExitTime = Math.min(exitTime.x, exitTime.y);
+
+            let resultTime = 1;
+            let normal = createVector(0, 0);
+            let side = "";
+
+            if (!(maxEntryTime > minExitTime ||
+                (entryTime.x < 0 && entryTime.y < 0)
+                || (entryTime.x < 0 && (this.right + velocity.x * maxEntryTime < aabb.left || this.left + velocity.x * maxEntryTime > aabb.right))
+                || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
+            )) {
+                resultTime = maxEntryTime;
+                if (entryTime.x < entryTime.y) {
+                    normal = createVector(Math.sign(deltaEntry.x), 0);
+                    if (velocity.y > 0) side = "bottom";
+                    else if (velocity.y < 0) side = "top";
+                } else if (entryTime.x > entryTime.y) {
+                    normal = createVector(0, Math.sign(deltaEntry.y));
+                    if (velocity.x > 0) side = "right";
+                    else if (velocity.x < 0) side = "left";
+                } else {
+                    // Both axes now have equal intersection depth (direct and perfect corner collision).
+                    // We need to use the velocity to determine the correct collision normal
+                    let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
+
+                    // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
+                    if (absVel.x >= absVel.y) {
+                        normal = createVector(Math.sign(velocity.x), 0);
+                        if (velocity.y > 0) side = "bottom";
+                        else if (velocity.y < 0) side = "top";
+                    } else if (absVel.x < absVel.y) {
+                        normal = createVector(0, Math.sign(velocity.y));
+                        if (velocity.x > 0) side = "right";
+                        else if (velocity.x < 0) side = "left";
+                    }
+                }
+            }
+
+            return new SweepData(
+                aabb, // Get a reference to the object the player has collided with
+                resultTime, // Retrieve the time of impact
+                normal, // Return the collision normal vector to apply sliding effect
+                side, // Know what side of the player has been touched (used for controlling logic like jumping and walking)
+                this.center.copy().sub(aabb.center).magSq() // Calculate the distance (squared for performance) used to resolve the closest collision subject
+            );
+        }
+
+        // Checks for collision with tiles around the player.
+        // Tiles with ID greater than zero are translated to
+        // an AABB object where it is used in the swept collision
+        // resolution (this makes the code extensible for different
+        // uses like moving objects in a spatial grid).
+        tileMapBroadPhase(deltaTime) {
+            let bounds = this.getCollisionBoundary(deltaTime);
+            let centralTile = Tile.toTile(bounds.center);
+            const proxy = 1;
+            let tileX = Math.round(bounds.extents.x * 2 / Tile.SIZE + proxy);
+            let tileY = Math.round(bounds.extents.y * 2 / Tile.SIZE + proxy);
+            if (tileX === 1) tileX++;
+            if (tileY === 1) tileY++;
+            let tileArea = createVector(tileX, tileY);
+            for (let x = -tileArea.x + 1; x < tileArea.x; x++) {
+                for (let y = -tileArea.y + 1; y < tileArea.y; y++) {
+                    let xx = centralTile.x + x;
+                    let yy = centralTile.y + y;
+                    let tile = new AABB( // Translate tile to an AABB object
+                        createVector(xx * tileSize + tileSize / 2, yy * tileSize + tileSize / 2),
+                        createVector(tileSize / 2, tileSize / 2)
+                    );
+                    if (// Check map constraints and tile solidity
+                        xx < 0 || xx >= mapSize.x ||
+                        yy < 0 || yy >= mapSize.y ||
+                        tileMap.getTileId(xx, yy) === 0
+                        || !bounds.overlaps(tile)
+                    ) continue;
+
+                    this.collisionStack.push(this.calculateSweepData(tile, this.body.vel, deltaTime));
+                }
+            }
+        }
+
+        update() {
+
+        }
+    }
+
+</script>
+</body>
+</html>

@@ -117,23 +117,12 @@ export default class Entity {
             if (hit.entity !== null)
                 CollisionEventHandler.postCollisionEvents(this, hit, deltaTime);
 
-            this.body.center.add(hit.normal.mult(time * deltaTime));
-
-            function highlight(box, c = color(0, 255, 0)) {
-                stroke(c);
-                strokeWeight(1);
-                rect(box.center.x, box.center.y, box.extents.x * 2, box.extents.y * 2);
-                noFill();
-            }
-
-            highlight(hit.aabb);
+            //this.body.center.add(hit.normal.mult(time * deltaTime));
 
             if (time > 0) {
-                /*
+                ///*
                 let stack = [];
                 for (let sweep of collisionStack) {
-                    fill(255);
-                    highlight(sweep.aabb, color(255));
                     if (this.body.getCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
                         let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime, sweep.entity);
                         stack.push(newSweep);
@@ -141,7 +130,7 @@ export default class Entity {
                 }
                 // Keep resolving collisions for the other potential collisions
                 this.checkCollision(deltaTime, hit.normal, time, stack, count + 1);
-                 */
+                //*/
             }
         } else {
             this.body.center.add(p5.Vector.mult(movement, deltaTime));
