@@ -130,7 +130,7 @@ export default class Entity {
                 for (let sweep of collisionStack) {
                     fill(255);
                     highlight(sweep.aabb, color(255));
-                    if (this.body.getCollisionBoundary(deltaTime, hit.normal.copy().add(1)).overlaps(sweep.aabb)) {
+                    if (this.body.getCollisionBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
                         let newSweep = this.body.getSweepObject(sweep.aabb, hit.normal, deltaTime, sweep.entity);
                         stack.push(newSweep);
                     }

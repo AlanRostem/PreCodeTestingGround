@@ -92,6 +92,7 @@ export default class RectBody extends AABB {
         let resultTime = 1;
         let normal = createVector();
         let side = "";
+        let hasCollided = false;
 
         if (!(maxEntryTime > minExitTime ||
             (entryTime.x < 0 && entryTime.y < 0)
@@ -99,6 +100,7 @@ export default class RectBody extends AABB {
             || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
         )) {
             resultTime = maxEntryTime;
+            hasCollided = true;
             if (entryTime.x < entryTime.y) {
                 normal = createVector(Math.sign(deltaEntry.x), 0);
                 if (velocity.y > 0) side = "bottom";
@@ -153,7 +155,7 @@ export default class RectBody extends AABB {
 
         //resultTime = Math.floor(resultTime / AABB.EPSILON) * AABB.EPSILON;
 
-        return new Sweep(aabb, entity, resultTime, normal, side, this.center.copy().sub(aabb.center).magSq());
+        return new Sweep(aabb, entity, resultTime, normal, side, this.center.copy().sub(aabb.center).magSq(), hasCollided);
     }
 
     get displacement() {
