@@ -358,6 +358,11 @@
                                 rectMode(CENTER);
                                 rect(dummy.center.x, dummy.center.y, dummy.extents.x * 2, dummy.extents.y * 2);
                                 rectMode(CORNER);
+                                let distX = dummy.center.x - this.center.x;
+                                if (abs(distX) < abs(hit.normal.x * deltaTime * time)) {
+                                    hit.normal.x = distX;
+                                    hit.normal.y = 1;
+                                }
                             }
                         }
 
