@@ -49,23 +49,13 @@
 
         const speed = 100;
         e0 = new Entity(
-            createVector(64, 64),
+            createVector(64 * 2 + 16 - 8, 64),
             createVector(tileSize / 2, tileSize / 2)
         );
 
-        e0.vel.x = speed;
-        e0.vel.y = speed;
-
-        e1 = new Entity(
-            createVector(64 + 16 * 2, 64 + 16 * 2),
-            createVector(tileSize / 2, tileSize / 2)
-        );
-
-        e1.vel.x = -speed;
-        e1.vel.y = -speed;
+       // e0.vel.y = 200;
 
         entities.push(e0);
-        entities.push(e1);
         entities.push(player);
 
         clear = console.clear;
@@ -315,7 +305,7 @@
 
         entityBroadPhase(deltaTime) {
             for (let e of entities) {
-                if (this.createMovementBoundary(deltaTime).overlaps(e)) {
+                if (this.createMovementBoundary(deltaTime).overlaps(e) && this !== e) {
                     let speep = this.calculateSweepData(e, this.vel, deltaTime);
                     this.collisionStack.push(speep);
                 }
@@ -342,6 +332,7 @@
                 let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
                 hit.normal.mult(dotProduct);
 
+                let potential = this.vel.copy();
                 // Handle events after each respective side that collided
                 this.onCollision(hit.side);
 
@@ -349,6 +340,27 @@
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
+
+                    let initialDistCheckY = hit.aabb.center.y - this.center.y;
+                    if (initialDistCheckY === this.extents.y * 2) {
+                        let dummy = new AABB(hit.aabb.center.copy(), this.extents.copy());
+                        dummy.center.x += hit.aabb.extents.x + this.extents.x;
+
+                        let isSmuttHull = collisionStack.length > 0;
+                        for (let sweep of collisionStack) {
+                            if (hit.normal.x !== 0 && potential.y !== 0) {
+                                isSmuttHull = isSmuttHull && !dummy.overlaps(sweep.aabb);
+                            }
+                        }
+
+                        if (isSmuttHull) {
+                            fill(255);
+                            rectMode(CENTER);
+                            rect(dummy.center.x, dummy.center.y, dummy.extents.x * 2, dummy.extents.y * 2);
+                            rectMode(CORNER);
+                        }
+                    }
+
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
                         if (this.createMovementBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
@@ -409,7 +421,8 @@
 
         controls() {
             this.vel.y += 500 * deltaTime / 1000;
-            const speed = 100;
+            let speed = 100;
+            if (keyIsDown(16)) speed = 10;
             if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
             if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
 
@@ -417,7 +430,7 @@
             if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
 
             if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -speed;
+                this.vel.y = -60;
             }
         }
     }
