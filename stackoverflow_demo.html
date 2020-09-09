@@ -10,7 +10,10 @@
     const tileSize = 16;
     let mapSize;
     let tileMap;
+    let entities;
     let player;
+
+    let e0, e1;
 
     function setup() {
         createCanvas(320, 320);
@@ -41,13 +44,36 @@
             1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
-
+        entities = [];
         player = new Player();
+
+        const speed = 100;
+        e0 = new Entity(
+            createVector(64, 64),
+            createVector(tileSize / 2, tileSize / 2)
+        );
+
+        e0.vel.x = speed;
+        e0.vel.y = speed;
+
+        e1 = new Entity(
+            createVector(64 + 16 * 2, 64 + 16 * 2),
+            createVector(tileSize / 2, tileSize / 2)
+        );
+
+        e1.vel.x = -speed;
+        e1.vel.y = -speed;
+
+        entities.push(e0);
+        entities.push(e1);
+        entities.push(player);
+
+        clear = console.clear;
     }
 
     function draw() {
         background(150);
-        player.update(deltaTime / 1000);
+        smooth();
 
         // Draw the tile-map
         for (let y = 0; y < mapSize.y; y++)
@@ -58,7 +84,13 @@
                 }
             }
 
-        player.draw();
+        for (let e of entities) {
+            e.draw();
+        }
+
+        for (let e of entities) {
+            e.update(deltaTime / 1000);
+        }
     }
 
     // Bounding box class with a central position
@@ -122,16 +154,9 @@
     // Basic class for a controllable character that can move
     // and collide with the environment. All collision resolution
     // logic for this demo will occur here.
-    class Player extends AABB {
+    class Entity extends AABB {
         vel = createVector(0, 0); // Velocity component (starts at zero)
         collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
-        jumping = false; // Control-variable for jumping effect
-        constructor() {
-            super(
-                createVector(width / 2, height / 2), // Place the player at the center of the screen
-                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
-            );
-        }
 
         // Returns an AABB object with the position of the player, but it's size
         // is the player's size plus the player's velocity in its respective direction.
@@ -233,7 +258,7 @@
                         normal = createVector(Math.sign(velocity.x), 0);
                         if (velocity.y > 0) side = "bottom";
                         else if (velocity.y < 0) side = "top";
-                    } else if (absVel.x < absVel.y) {
+                    } else {
                         normal = createVector(0, Math.sign(velocity.y));
                         if (velocity.x > 0) side = "right";
                         else if (velocity.x < 0) side = "left";
@@ -288,6 +313,15 @@
             }
         }
 
+        entityBroadPhase(deltaTime) {
+            for (let e of entities) {
+                if (this.createMovementBoundary(deltaTime).overlaps(e)) {
+                    let speep = this.calculateSweepData(e, this.vel, deltaTime);
+                    this.collisionStack.push(speep);
+                }
+            }
+        }
+
         resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
             // Sort collisions in the correct order: First by distance, then by
             // time of impact to correct the order a bit.
@@ -336,6 +370,7 @@
                 case "top":
                 case "bottom":
                     this.vel.y = 0;
+                    this.jumping = false;
                     break;
                 case "left":
                 case "right":
@@ -344,23 +379,8 @@
             }
         }
 
-        controls() {
-            const speed = 100;
-            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
-            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
-
-            // Stop movement if no input is specified
-            if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
-
-            if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -speed;
-            }
-        }
-
         update(deltaTime) {
-            // Apply constant gravity
-            this.vel.y += 500 * deltaTime;
-            this.controls();
+            this.entityBroadPhase(deltaTime);
             this.tileMapBroadPhase(deltaTime);
             this.resolveCollisionOrMove(deltaTime);
             this.collisionStack = [];
@@ -371,6 +391,34 @@
             rectMode(CENTER);
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
             rectMode(CORNER);
+        }
+    }
+
+    class Player extends Entity {
+        constructor() {
+            super(
+                createVector(width / 2, height / 2), // Place the player at the center of the screen
+                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+            );
+        }
+
+        update(deltaTime) {
+            this.controls();
+            super.update(deltaTime);
+        }
+        jumping = false;
+        controls() {
+            this.vel.y += 500 * deltaTime / 1000;
+            const speed = 100;
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
+
+            // Stop movement if no input is specified
+            if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
+
+            if (keyIsDown(32)) { // Press space to fly
+                this.vel.y = -speed;
+            }
         }
     }
 
