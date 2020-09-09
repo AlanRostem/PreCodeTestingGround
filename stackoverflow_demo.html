@@ -41,7 +41,7 @@
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
         entities = [];
@@ -359,9 +359,9 @@
                                 rect(dummy.center.x, dummy.center.y, dummy.extents.x * 2, dummy.extents.y * 2);
                                 rectMode(CORNER);
                                 let distX = dummy.center.x - this.center.x;
-                                if (abs(distX) < abs(hit.normal.x * deltaTime * time)) {
+                                if (abs(distX) < abs(hit.normal.x * deltaTime)) {
                                     hit.normal.x = distX;
-                                    hit.normal.y = 1;
+                                    hit.normal.y = potential.y;
                                 }
                             }
                         }
@@ -428,6 +428,7 @@
             this.vel.y += 500 * deltaTime / 1000;
             let speed = 100;
             if (keyIsDown(16)) speed = 10;
+            if (keyIsDown(81)) speed = 200;
             if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
             if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
 
