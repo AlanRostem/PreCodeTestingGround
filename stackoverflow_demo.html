@@ -41,7 +41,7 @@
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
         entities = [];
@@ -53,7 +53,7 @@
             createVector(tileSize / 2, tileSize / 2)
         );
 
-       // e0.vel.y = 200;
+        // e0.vel.y = 200;
 
         entities.push(e0);
         entities.push(player);
@@ -342,24 +342,24 @@
                     let stack = [];
 
                     let initialDistCheckY = hit.aabb.center.y - this.center.y;
-                    if (initialDistCheckY === this.extents.y * 2) {
-                        let dummy = new AABB(hit.aabb.center.copy(), this.extents.copy());
-                        dummy.center.x += hit.aabb.extents.x + this.extents.x;
+                    if (hit.normal.x !== 0 && potential.y !== 0)
 
-                        let isSmuttHull = collisionStack.length > 0;
-                        for (let sweep of collisionStack) {
-                            if (hit.normal.x !== 0 && potential.y !== 0) {
+                        if (initialDistCheckY === this.extents.y * 2) {
+                            let dummy = new AABB(hit.aabb.center.copy(), this.extents.copy());
+                            dummy.center.x += (hit.aabb.extents.x + this.extents.x) * Math.sign(potential.x);
+
+                            let isSmuttHull = true;
+                            for (let sweep of collisionStack) {
                                 isSmuttHull = isSmuttHull && !dummy.overlaps(sweep.aabb);
                             }
-                        }
 
-                        if (isSmuttHull) {
-                            fill(255);
-                            rectMode(CENTER);
-                            rect(dummy.center.x, dummy.center.y, dummy.extents.x * 2, dummy.extents.y * 2);
-                            rectMode(CORNER);
+                            if (isSmuttHull) {
+                                fill(255);
+                                rectMode(CENTER);
+                                rect(dummy.center.x, dummy.center.y, dummy.extents.x * 2, dummy.extents.y * 2);
+                                rectMode(CORNER);
+                            }
                         }
-                    }
 
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
