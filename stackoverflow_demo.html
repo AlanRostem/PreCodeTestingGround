@@ -99,6 +99,10 @@
                 this.bottom > aabb.top;
         }
 
+        copy() {
+            return new AABB(this.center.copy(), this.extents.copy());
+        }
+
         get top() {
             return this.center.y - this.extents.y;
         }
@@ -363,11 +367,17 @@
 
         fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
+                let index;
+
+                if (hit.normal.y > 0) index = 0; // Bottom
+                if (hit.normal.x > 0) index = 1; // Right
+                if (hit.normal.y < 0) index = 2; // Top
+                if (hit.normal.x < 0) index = 3; // Left
 
                 let direction = Math.sign(hit.normal.x);
 
-                let standingOn = hit.aabb;
-                let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
+                let standingOn = hit.aabb.copy();
+                let nextToHole = collisionStack[0].aabb.copy(); // TODO: Find out if this detects the wrong one
 
                 let requiredYDist = this.extents.y * 2;
                 let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
