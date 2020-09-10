@@ -10,7 +10,10 @@
     const tileSize = 16;
     let mapSize;
     let tileMap;
+    let entities;
     let player;
+
+    let e0, e1;
 
     function setup() {
         createCanvas(320, 320);
@@ -26,30 +29,45 @@
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
-
+        entities = [];
         player = new Player();
+
+        const speed = 100;
+        e0 = new Entity(
+            createVector(64 * 2 + 16 - 8, 64),
+            createVector(tileSize / 2, tileSize / 2)
+        );
+
+        // e0.vel.y = 200;
+
+        entities.push(e0);
+        entities.push(player);
+
+        clear = console.clear;
     }
 
     function draw() {
+        deltaTime = 16;
         background(150);
-        player.update(deltaTime / 1000);
+        smooth();
 
         // Draw the tile-map
+        stroke(0);
         for (let y = 0; y < mapSize.y; y++)
             for (let x = 0; x < mapSize.x; x++) {
                 if (tileMap[x + y * mapSize.x] !== 0) {
@@ -58,7 +76,13 @@
                 }
             }
 
-        player.draw();
+        for (let e of entities) {
+            e.draw();
+        }
+
+        for (let e of entities) {
+            e.update(deltaTime / 1000);
+        }
     }
 
     // Bounding box class with a central position
@@ -73,6 +97,10 @@
                 this.right > aabb.left &&
                 this.top < aabb.bottom &&
                 this.bottom > aabb.top;
+        }
+
+        copy() {
+            return new AABB(this.center.copy(), this.extents.copy());
         }
 
         get top() {
@@ -119,19 +147,36 @@
         }
     }
 
+    class Matrix {
+        constructor(a00, a01, a10, a11) {
+            this.data = [...arguments];
+        }
+
+        get(x, y) {
+            return this.data[x + 2 * y];
+        }
+
+        mult(v) {
+            let vec = v.copy();
+            const x = vec.x;
+            vec.x = vec.x * this.get(0, 0) + this.get(1, 0) * vec.y;
+            vec.y = x * this.get(0, 1) + this.get(1, 1) * vec.y;
+            return vec;
+        }
+    }
+
     // Basic class for a controllable character that can move
     // and collide with the environment. All collision resolution
     // logic for this demo will occur here.
-    class Player extends AABB {
+    class Entity extends AABB {
+        side = {
+            "left": false,
+            "right": false,
+            "top": false,
+            "bottom": false,
+        };
         vel = createVector(0, 0); // Velocity component (starts at zero)
         collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
-        jumping = false; // Control-variable for jumping effect
-        constructor() {
-            super(
-                createVector(width / 2, height / 2), // Place the player at the center of the screen
-                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
-            );
-        }
 
         // Returns an AABB object with the position of the player, but it's size
         // is the player's size plus the player's velocity in its respective direction.
@@ -224,16 +269,20 @@
                     if (velocity.x > 0) side = "right";
                     else if (velocity.x < 0) side = "left";
                 } else {
+                    fill(0, 255, 255);
+                    rectMode(CENTER);
+                    rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
+                    rectMode(CORNER);
                     // Both axes now have equal intersection depth (direct and perfect corner collision).
                     // We need to use the velocity to determine the correct collision normal
                     let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
 
                     // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
-                    if (absVel.x >= absVel.y) {
+                    if (absVel.x < absVel.y) {
                         normal = createVector(Math.sign(velocity.x), 0);
                         if (velocity.y > 0) side = "bottom";
                         else if (velocity.y < 0) side = "top";
-                    } else if (absVel.x < absVel.y) {
+                    } else if (absVel.x > absVel.y) {
                         normal = createVector(0, Math.sign(velocity.y));
                         if (velocity.x > 0) side = "right";
                         else if (velocity.x < 0) side = "left";
@@ -288,6 +337,79 @@
             }
         }
 
+        entityBroadPhase(deltaTime) {
+            for (let e of entities) {
+                if (this.createMovementBoundary(deltaTime).overlaps(e) && this !== e) {
+                    let speep = this.calculateSweepData(e, this.vel, deltaTime);
+                    this.collisionStack.push(speep);
+                }
+            }
+        }
+
+        static MATRICES = [
+            new Matrix(
+                1, 0,
+                0, 1,
+            ),
+            new Matrix(
+                0, 1,
+                -1, 0)
+            ,
+            new Matrix(
+                -1, 0,
+                0, -1,
+            ),
+            new Matrix(
+                0, -1,
+                1, 0,
+            ),
+        ];
+
+        fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
+            if (collisionStack.length > 0) {
+                let index;
+
+                if (hit.normal.y > 0) index = 0; // Bottom
+                if (hit.normal.x > 0) index = 1; // Right
+                if (hit.normal.y < 0) index = 2; // Top
+                if (hit.normal.x < 0) index = 3; // Left
+
+                let direction = Math.sign(hit.normal.x);
+
+                let standingOn = hit.aabb.copy();
+                let nextToHole = collisionStack[0].aabb.copy(); // TODO: Find out if this detects the wrong one
+
+                let requiredYDist = this.extents.y * 2;
+                let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
+                    (nextToHole.center.y - this.center.y) === requiredYDist;
+
+                if (areBothUnderMe) {
+                    let requiredXDist = this.extents.x * 4 * direction;
+                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
+
+                    if (isHoleBetween) {
+                        let hole = new AABB(standingOn.center.copy(), this.extents.copy());
+                        hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+
+                        fill(255);
+                        rectMode(CENTER);
+                        rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
+                        rectMode(CORNER);
+
+                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                        barrier.center.y -= this.extents.y * 2;
+
+                        collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
+
+                        fill(0);
+                        rectMode(CENTER);
+                        rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
+                        rectMode(CORNER);
+                    }
+                }
+            }
+        }
+
         resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
             // Sort collisions in the correct order: First by distance, then by
             // time of impact to correct the order a bit.
@@ -310,14 +432,21 @@
 
                 // Handle events after each respective side that collided
                 this.onCollision(hit.side);
-
                 if (time > 0) {
+                    const boundary = this.createMovementBoundary(deltaTime, movement);
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
+                    this.fixEqualSizedHoleCollision(hit, collisionStack, deltaTime);
+
+                    stroke(255, 0, 0);
+                    noFill();
+                    rectMode(CENTER);
+                    //rect(boundary.center.x, boundary.center.y, boundary.extents.x * 2, boundary.extents.y * 2);
+                    rectMode(CORNER);
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
-                        if (this.createMovementBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
+                        if (boundary.overlaps(sweep.aabb)) {
                             let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
                             stack.push(newSweep);
                         }
@@ -328,14 +457,24 @@
                 }
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime));
+                stroke(255, 255, 0);
+                line(this.center.x + Math.sign(movement.x) * this.extents.x, this.center.y + Math.sign(movement.y) * this.extents.y,
+                    this.center.x + movement.x * deltaTime,
+                    this.center.y + movement.y * deltaTime,)
+                ;
+                noStroke();
             }
+
+
         }
 
         onCollision(side) {
+            this.side[side] = true;
             switch (side) {
                 case "top":
                 case "bottom":
                     this.vel.y = 0;
+                    this.jumping = false;
                     break;
                 case "left":
                 case "right":
@@ -344,23 +483,14 @@
             }
         }
 
-        controls() {
-            const speed = 100;
-            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
-            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
-
-            // Stop movement if no input is specified
-            if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
-
-            if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -speed;
-            }
-        }
-
         update(deltaTime) {
-            // Apply constant gravity
-            this.vel.y += 500 * deltaTime;
-            this.controls();
+            this.side = {
+                "left": false,
+                "right": false,
+                "top": false,
+                "bottom": false,
+            };
+            this.entityBroadPhase(deltaTime);
             this.tileMapBroadPhase(deltaTime);
             this.resolveCollisionOrMove(deltaTime);
             this.collisionStack = [];
@@ -371,6 +501,37 @@
             rectMode(CENTER);
             rect(this.center.x, this.center.y, this.extents.x * 2, this.extents.y * 2);
             rectMode(CORNER);
+        }
+    }
+
+    class Player extends Entity {
+        constructor() {
+            super(
+                createVector(width / 2, height / 2), // Place the player at the center of the screen
+                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+            );
+        }
+
+        update(deltaTime) {
+            this.controls();
+            super.update(deltaTime);
+        }
+
+        controls() {
+            this.vel.y += 600 * deltaTime / 1000;
+            let speed = 60;
+            if (keyIsDown(16)) speed = 5;
+            if (keyIsDown(81)) speed = 500;
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
+
+            // Stop movement if no input is specified
+            //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
+            this.vel.x *= 0.97;
+
+            if (keyIsDown(32)) { // Press space to fly
+                this.vel.y = -60;
+            }
         }
     }
 
