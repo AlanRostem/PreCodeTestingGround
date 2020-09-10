@@ -147,6 +147,12 @@
     // and collide with the environment. All collision resolution
     // logic for this demo will occur here.
     class Entity extends AABB {
+        side = {
+            "left": false,
+            "right": false,
+            "top": false,
+            "bottom": false,
+        };
         vel = createVector(0, 0); // Velocity component (starts at zero)
         collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
 
@@ -248,7 +254,7 @@
                     // Both axes now have equal intersection depth (direct and perfect corner collision).
                     // We need to use the velocity to determine the correct collision normal
                     let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
-                    
+
                     // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
                     if (absVel.x < absVel.y) {
                         normal = createVector(Math.sign(velocity.x), 0);
@@ -415,6 +421,7 @@
         }
 
         onCollision(side) {
+            this.side[side] = true;
             switch (side) {
                 case "top":
                 case "bottom":
@@ -429,6 +436,12 @@
         }
 
         update(deltaTime) {
+            this.side = {
+                "left": false,
+                "right": false,
+                "top": false,
+                "bottom": false,
+            };
             this.entityBroadPhase(deltaTime);
             this.tileMapBroadPhase(deltaTime);
             this.resolveCollisionOrMove(deltaTime);
@@ -461,8 +474,8 @@
             let speed = 60;
             if (keyIsDown(16)) speed = 5;
             if (keyIsDown(81)) speed = 500;
-            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
-            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
+            if (keyIsDown(65) && !this.side.left) this.vel.x = -speed; // Press A to walk left
+            if (keyIsDown(68) && !this.side.right) this.vel.x = speed; // Press D to walk left
 
             // Stop movement if no input is specified
             //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
