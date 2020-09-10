@@ -342,20 +342,32 @@
                     let stack = [];
 
                     if (collisionStack.length > 0) {
+                        let direction = Math.sign(potential.x);
+
                         let standingOn = hit.aabb;
                         let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
+
                         let requiredYDist = this.extents.y * 2;
-                        let requiredXDist = this.extents.x * 4;
                         let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
                             (nextToHole.center.y - this.center.y) === requiredYDist;
+
                         if (areBothUnderMe) {
+                            let requiredXDist = this.extents.x * 4 * direction;
                             let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
+
+                            let hole = new AABB(standingOn.center.copy(), this.extents.copy());
+                            hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+
                             if (isHoleBetween) {
                                 fill(255);
                                 rectMode(CENTER);
-                                rect(standingOn.center.x, standingOn.center.y, standingOn.extents.x * 2, standingOn.extents.y * 2);
-                                rect(nextToHole.center.x, nextToHole.center.y, nextToHole.extents.x * 2, nextToHole.extents.y * 2);
+                                rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
                                 rectMode(CORNER);
+
+                                let distX = hole.center.x - this.center.x;
+                                if (abs(distX) < abs(hit.normal.x * time)) {
+                                    hit.normal.x = distX;
+                                }
                             }
                         }
                     }
