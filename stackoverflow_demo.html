@@ -62,10 +62,12 @@
     }
 
     function draw() {
+        deltaTime = 16;
         background(150);
         smooth();
 
         // Draw the tile-map
+        stroke(0);
         for (let y = 0; y < mapSize.y; y++)
             for (let x = 0; x < mapSize.x; x++) {
                 if (tileMap[x + y * mapSize.x] !== 0) {
@@ -312,6 +314,7 @@
             }
         }
 
+
         resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
             // Sort collisions in the correct order: First by distance, then by
             // time of impact to correct the order a bit.
@@ -337,10 +340,11 @@
                 this.onCollision(hit.side);
 
                 if (time > 0) {
+                    const boundary = this.createMovementBoundary(deltaTime, movement);
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-
+                    let hmm = false;
                     if (collisionStack.length > 0) {
                         let direction = Math.sign(potential.x);
 
@@ -366,22 +370,33 @@
 
                                 let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
                                 barrier.center.y -= this.extents.y * 2;
-                                collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
+                                stack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
                                 fill(0);
                                 rectMode(CENTER);
                                 rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
                                 rectMode(CORNER);
+                                hmm = true;
                             }
                         }
                     }
 
+                    stroke(255, 0, 0);
+                    noFill();
+                    rectMode(CENTER);
+                    rect(boundary.center.x, boundary.center.y, boundary.extents.x * 2, boundary.extents.y * 2);
+                    rectMode(CORNER);
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
-                        if (this.createMovementBoundary(deltaTime, hit.normal).overlaps(sweep.aabb)) {
+                        if (boundary.overlaps(sweep.aabb)) {
                             let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
                             stack.push(newSweep);
                         }
+                    }
+
+                    if (hmm) {
+                        //console.log(stack);
+                        //debugger
                     }
 
                     // Keep resolving collisions for the other potential collisions
@@ -437,8 +452,8 @@
         controls() {
             this.vel.y += 500 * deltaTime / 1000;
             let speed = 100;
-            if (keyIsDown(16)) speed = 10;
-            if (keyIsDown(81)) speed = 200;
+            if (keyIsDown(16)) speed = 5;
+            if (keyIsDown(81)) speed = 500;
             if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
             if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
 
