@@ -355,16 +355,23 @@
                             let requiredXDist = this.extents.x * 4 * direction;
                             let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
 
-                            let hole = new AABB(standingOn.center.copy(), this.extents.copy());
-                            hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
-
                             if (isHoleBetween) {
+                                let hole = new AABB(standingOn.center.copy(), this.extents.copy());
+                                hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+
                                 fill(255);
                                 rectMode(CENTER);
                                 rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
                                 rectMode(CORNER);
 
-                                // TODO: Find a way to fall into the hole
+                                let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                                barrier.center.y -= this.extents.y * 2;
+                                collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
+
+                                fill(0);
+                                rectMode(CENTER);
+                                rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
+                                rectMode(CORNER);
                             }
                         }
                     }
