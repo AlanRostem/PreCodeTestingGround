@@ -260,7 +260,7 @@
                         normal = createVector(Math.sign(velocity.x), 0);
                         if (velocity.y > 0) side = "bottom";
                         else if (velocity.y < 0) side = "top";
-                    } else {
+                    } else if (absVel.x > absVel.y) {
                         normal = createVector(0, Math.sign(velocity.y));
                         if (velocity.x > 0) side = "right";
                         else if (velocity.x < 0) side = "left";
@@ -474,8 +474,8 @@
             let speed = 60;
             if (keyIsDown(16)) speed = 5;
             if (keyIsDown(81)) speed = 500;
-            if (keyIsDown(65) && !this.side.left) this.vel.x = -speed; // Press A to walk left
-            if (keyIsDown(68) && !this.side.right) this.vel.x = speed; // Press D to walk left
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
 
             // Stop movement if no input is specified
             //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
