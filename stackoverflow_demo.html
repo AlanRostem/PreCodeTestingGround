@@ -143,6 +143,23 @@
         }
     }
 
+    class Matrix {
+        constructor(a00, a01, a10, a11) {
+            this.data = [...arguments];
+        }
+
+        get(x, y) {
+            return this.data[x + 2 * y];
+        }
+
+        mult(vec) {
+            const x = vec.x;
+            vec.x = vec.x * this.get(0, 0) + this.get(1, 0) * vec.y;
+            vec.y = x * this.get(0, 1) + this.get(1, 1) * vec.y;
+            return vec;
+        }
+    }
+
     // Basic class for a controllable character that can move
     // and collide with the environment. All collision resolution
     // logic for this demo will occur here.
@@ -324,8 +341,28 @@
             }
         }
 
+        static MATRICES = [
+            new Matrix(
+                1, 0,
+                0, 1,
+            ),
+            new Matrix(
+                0, 1,
+                -1, 0)
+            ,
+            new Matrix(
+                -1, 0,
+                0, -1,
+            ),
+            new Matrix(
+                0, -1,
+                1, 0,
+            ),
+        ];
+
         fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
+
                 let direction = Math.sign(hit.normal.x);
 
                 let standingOn = hit.aabb;
