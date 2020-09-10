@@ -241,14 +241,14 @@
                     if (velocity.x > 0) side = "right";
                     else if (velocity.x < 0) side = "left";
                 } else {
-                    fill(0, 100, 255);
+                    fill(0, 255, 255);
                     rectMode(CENTER);
                     rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
                     rectMode(CORNER);
                     // Both axes now have equal intersection depth (direct and perfect corner collision).
                     // We need to use the velocity to determine the correct collision normal
                     let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
-
+                    
                     // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
                     if (absVel.x < absVel.y) {
                         normal = createVector(Math.sign(velocity.x), 0);
@@ -318,6 +318,43 @@
             }
         }
 
+        fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
+            if (collisionStack.length > 0) {
+                let direction = Math.sign(hit.normal.x);
+
+                let standingOn = hit.aabb;
+                let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
+
+                let requiredYDist = this.extents.y * 2;
+                let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
+                    (nextToHole.center.y - this.center.y) === requiredYDist;
+
+                if (areBothUnderMe) {
+                    let requiredXDist = this.extents.x * 4 * direction;
+                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
+
+                    if (isHoleBetween) {
+                        let hole = new AABB(standingOn.center.copy(), this.extents.copy());
+                        hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+
+                        fill(255);
+                        rectMode(CENTER);
+                        rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
+                        rectMode(CORNER);
+
+                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                        barrier.center.y -= this.extents.y * 2;
+
+                        collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
+
+                        fill(0);
+                        rectMode(CENTER);
+                        rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
+                        rectMode(CORNER);
+                    }
+                }
+            }
+        }
 
         resolveCollisionOrMove(deltaTime, movement = this.vel, remainingTime = 1, collisionStack = this.collisionStack) {
             // Sort collisions in the correct order: First by distance, then by
@@ -339,52 +376,14 @@
                 let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
                 hit.normal.mult(dotProduct);
 
-                let potential = this.vel.copy();
                 // Handle events after each respective side that collided
                 this.onCollision(hit.side);
-
                 if (time > 0) {
                     const boundary = this.createMovementBoundary(deltaTime, movement);
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-                    let hmm = false;
-                    if (collisionStack.length > 0) {
-                        let direction = Math.sign(potential.x);
-
-                        let standingOn = hit.aabb;
-                        let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
-
-                        let requiredYDist = this.extents.y * 2;
-                        let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
-                            (nextToHole.center.y - this.center.y) === requiredYDist;
-
-                        if (areBothUnderMe) {
-                            let requiredXDist = this.extents.x * 4 * direction;
-                            let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
-
-                            if (isHoleBetween) {
-                                let hole = new AABB(standingOn.center.copy(), this.extents.copy());
-                                hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
-
-                                fill(255);
-                                rectMode(CENTER);
-                                rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
-                                rectMode(CORNER);
-
-                                let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
-                                barrier.center.y -= this.extents.y * 2;
-
-                                stack.push(this.calculateSweepData(barrier, potential, deltaTime));
-
-                                fill(0);
-                                rectMode(CENTER);
-                                rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
-                                rectMode(CORNER);
-                                hmm = true;
-                            }
-                        }
-                    }
+                    this.fixEqualSizedHoleCollision(hit, collisionStack, deltaTime);
 
                     stroke(255, 0, 0);
                     noFill();
@@ -397,11 +396,6 @@
                             let newSweep = this.calculateSweepData(sweep.aabb, hit.normal, deltaTime);
                             stack.push(newSweep);
                         }
-                    }
-
-                    if (hmm) {
-                        //console.log(stack);
-                        //debugger
                     }
 
                     // Keep resolving collisions for the other potential collisions
