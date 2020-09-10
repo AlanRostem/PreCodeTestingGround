@@ -364,10 +364,7 @@
                                 rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
                                 rectMode(CORNER);
 
-                                let distX = hole.center.x - this.center.x;
-                                if (abs(distX) < abs(hit.normal.x * time)) {
-                                    hit.normal.x = distX;
-                                }
+                                // TODO: Find a way to fall into the hole
                             }
                         }
                     }
