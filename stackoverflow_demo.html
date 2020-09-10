@@ -152,7 +152,8 @@
             return this.data[x + 2 * y];
         }
 
-        mult(vec) {
+        mult(v) {
+            let vec = v.copy();
             const x = vec.x;
             vec.x = vec.x * this.get(0, 0) + this.get(1, 0) * vec.y;
             vec.y = x * this.get(0, 1) + this.get(1, 1) * vec.y;
