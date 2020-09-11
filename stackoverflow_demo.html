@@ -49,13 +49,17 @@
 
         const speed = 100;
         e0 = new Entity(
-            createVector(64 * 2 + 16 - 8, 64),
-            createVector(tileSize / 2, tileSize / 2)
+            createVector(64 * 2, 64),
+            createVector(tileSize, tileSize / 2)
         );
 
-        // e0.vel.y = 200;
+        e1= new Entity(
+            createVector(64 * 2.5 + 16, 64),
+            createVector(tileSize, tileSize / 2)
+        );
 
         entities.push(e0);
+        entities.push(e1);
         entities.push(player);
 
         clear = console.clear;
@@ -144,24 +148,6 @@
             this.normal = normal;
             this.side = side;
             this.distance = distance;
-        }
-    }
-
-    class Matrix {
-        constructor(a00, a01, a10, a11) {
-            this.data = [...arguments];
-        }
-
-        get(x, y) {
-            return this.data[x + 2 * y];
-        }
-
-        mult(v) {
-            let vec = v.copy();
-            const x = vec.x;
-            vec.x = vec.x * this.get(0, 0) + this.get(1, 0) * vec.y;
-            vec.y = x * this.get(0, 1) + this.get(1, 1) * vec.y;
-            return vec;
         }
     }
 
@@ -370,6 +356,7 @@
                     requiredHoleSize = (self.extents.x * 2 + standingOn.extents.x + nextToHole.extents.x) * movementDir;
                     isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
                     barrierOffset.y = self.extents.y * 2 * touchDir;
+                    barrierOffset.x = (self.extents.x - nextToHole.extents.x) * -movementDir
                 }
 
                 if (hit.normal.y !== 0) {
@@ -382,16 +369,10 @@
                     requiredHoleSize = (self.extents.y * 2 + standingOn.extents.y + nextToHole.extents.y) * movementDir;
                     isHoleBetween = (nextToHole.center.y - standingOn.center.y) === requiredHoleSize;
                     barrierOffset.x = self.extents.x * 2 * touchDir;
+                    barrierOffset.y = (self.extents.y - nextToHole.extents.y) * -movementDir
                 }
 
                 if (areBothUnderMe && isHoleBetween) {
-                    if (hit.normal.x !== 0) {
-                        hit.normal.y = touchDir;
-                    }
-
-                    if (hit.normal.y !== 0) {
-                        hit.normal.x = touchDir;
-                    }
                     let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
                     barrier.center.sub(barrierOffset);
                     collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
