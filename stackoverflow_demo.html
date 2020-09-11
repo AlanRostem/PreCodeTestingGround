@@ -24,7 +24,7 @@
             // to edit this to structure your own testing ground. 0 is
             // empty space and 1 or above is a solid tile.
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -365,39 +365,42 @@
             ),
         ];
 
-        fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
+        fixEqualSizedHoleCollision(hit, potentialMovement, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
-                let index;
+                let movementDir = Math.sign(hit.normal.x);
+                let touchDir = Math.sign(potentialMovement.y);
 
-                if (hit.normal.y > 0) index = 0; // Bottom
-                if (hit.normal.x > 0) index = 1; // Right
-                if (hit.normal.y < 0) index = 2; // Top
-                if (hit.normal.x < 0) index = 3; // Left
+                let self = this;
+                let standingOn = hit.aabb;
+                let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
 
-                let direction = Math.sign(hit.normal.x);
+                let requiredSurfaceDist = self.extents.y * 2 * touchDir;
+                let areBothUnderMe = (standingOn.center.y - self.center.y) === requiredSurfaceDist &&
+                    (nextToHole.center.y - self.center.y) === requiredSurfaceDist;
 
-                let standingOn = hit.aabb.copy();
-                let nextToHole = collisionStack[0].aabb.copy(); // TODO: Find out if this detects the wrong one
+                if (hit.normal.x !== 0) {
 
-                let requiredYDist = this.extents.y * 2;
-                let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
-                    (nextToHole.center.y - this.center.y) === requiredYDist;
+                }
+
+                if (hit.normal.y !== 0) {
+
+                }
 
                 if (areBothUnderMe) {
-                    let requiredXDist = this.extents.x * 4 * direction;
-                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
+                    let requiredHoleSize = self.extents.x * 4 * movementDir;
+                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
 
                     if (isHoleBetween) {
-                        let hole = new AABB(standingOn.center.copy(), this.extents.copy());
-                        hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+                        let hole = new AABB(standingOn.center.copy(), self.extents.copy());
+                        hole.center.x += (standingOn.extents.x + self.extents.x) * movementDir;
 
                         fill(255);
                         rectMode(CENTER);
                         rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
                         rectMode(CORNER);
 
-                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
-                        barrier.center.y -= this.extents.y * 2;
+                        let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
+                        barrier.center.y -= self.extents.y * 2 * touchDir;
 
                         collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
@@ -431,13 +434,14 @@
                 hit.normal.mult(dotProduct);
 
                 // Handle events after each respective side that collided
+                let potnetial = this.vel.copy();
                 this.onCollision(hit.side);
                 if (time > 0) {
                     const boundary = this.createMovementBoundary(deltaTime, movement);
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-                    this.fixEqualSizedHoleCollision(hit, collisionStack, deltaTime);
+                    this.fixEqualSizedHoleCollision(hit, potnetial, collisionStack, deltaTime);
 
                     stroke(255, 0, 0);
                     noFill();
