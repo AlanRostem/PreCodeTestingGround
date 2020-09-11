@@ -367,8 +367,6 @@
 
         fixEqualSizedHoleCollision(hit, potentialMovement, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
-
-
                 let self = this;
                 let standingOn = hit.aabb;
                 let nextToHole = collisionStack[0].aabb; // TODO: Find out if this detects the wrong one
@@ -393,7 +391,14 @@
                 }
 
                 if (hit.normal.y !== 0) {
-
+                    movementDir = Math.sign(hit.normal.y);
+                    touchDir = Math.sign(potentialMovement.x);
+                    requiredSurfaceDist = self.extents.x * 2 * touchDir;
+                    areBothUnderMe = (standingOn.center.x - self.center.x) === requiredSurfaceDist &&
+                        (nextToHole.center.x - self.center.x) === requiredSurfaceDist;
+                    requiredHoleSize = self.extents.y * 4 * movementDir;
+                    isHoleBetween = (nextToHole.center.y - standingOn.center.y) === requiredHoleSize;
+                    barrierOffset.x = self.extents.x * 2 * touchDir;
                 }
 
                 if (areBothUnderMe && isHoleBetween) {
