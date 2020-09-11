@@ -385,8 +385,14 @@
                 }
 
                 if (areBothUnderMe && isHoleBetween) {
+                    if (hit.normal.x !== 0) {
+                        hit.normal.y = touchDir;
+                    }
+
+                    if (hit.normal.y !== 0) {
+                        hit.normal.x = touchDir;
+                    }
                     let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
-                    barrier.isBarrier = true;
                     barrier.center.sub(barrierOffset);
                     collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
@@ -410,10 +416,6 @@
                 this.center.x += movement.x * hit.collisionTime * deltaTime;
                 this.center.y += movement.y * hit.collisionTime * deltaTime;
 
-                if (hit.aabb.isBarrier) {
-                    noLoop()
-                }
-
                 // Calculate the correct time of impact for the remaining
                 // collisions or to apply movement
                 let time = remainingTime - hit.collisionTime;
@@ -423,14 +425,14 @@
                 hit.normal.mult(dotProduct);
 
                 // Handle events after each respective side that collided
-                let potnetial = this.vel.copy();
+                let potential = this.vel.copy();
                 this.onCollision(hit.side);
                 if (time > 0) {
                     const boundary = this.createMovementBoundary(deltaTime, movement);
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-                    this.fixEqualSizedHoleCollision(hit, potnetial, collisionStack, deltaTime);
+                    this.fixEqualSizedHoleCollision(hit, potential, collisionStack, deltaTime);
 
                     stroke(255, 0, 0);
                     noFill();
@@ -451,8 +453,6 @@
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime));
             }
-
-
         }
 
         onCollision(side) {
