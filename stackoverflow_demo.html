@@ -346,25 +346,6 @@
             }
         }
 
-        static MATRICES = [
-            new Matrix(
-                1, 0,
-                0, 1,
-            ),
-            new Matrix(
-                0, 1,
-                -1, 0)
-            ,
-            new Matrix(
-                -1, 0,
-                0, -1,
-            ),
-            new Matrix(
-                0, -1,
-                1, 0,
-            ),
-        ];
-
         fixEqualSizedHoleCollision(hit, potentialMovement, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
                 let self = this;
@@ -383,9 +364,10 @@
                     movementDir = Math.sign(hit.normal.x);
                     touchDir = Math.sign(potentialMovement.y);
                     requiredSurfaceDist = self.extents.y * 2 * touchDir;
-                    areBothUnderMe = (standingOn.center.y - self.center.y) === requiredSurfaceDist &&
+                    areBothUnderMe =
+                        (standingOn.center.y - self.center.y) === requiredSurfaceDist &&
                         (nextToHole.center.y - self.center.y) === requiredSurfaceDist;
-                    requiredHoleSize = self.extents.x * 4 * movementDir;
+                    requiredHoleSize = (self.extents.x * 2 + standingOn.extents.x + nextToHole.extents.x) * movementDir;
                     isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
                     barrierOffset.y = self.extents.y * 2 * touchDir;
                 }
@@ -394,9 +376,10 @@
                     movementDir = Math.sign(hit.normal.y);
                     touchDir = Math.sign(potentialMovement.x);
                     requiredSurfaceDist = self.extents.x * 2 * touchDir;
-                    areBothUnderMe = (standingOn.center.x - self.center.x) === requiredSurfaceDist &&
+                    areBothUnderMe =
+                        (standingOn.center.x - self.center.x) === requiredSurfaceDist &&
                         (nextToHole.center.x - self.center.x) === requiredSurfaceDist;
-                    requiredHoleSize = self.extents.y * 4 * movementDir;
+                    requiredHoleSize = (self.extents.y * 2 + standingOn.extents.y + nextToHole.extents.y) * movementDir;
                     isHoleBetween = (nextToHole.center.y - standingOn.center.y) === requiredHoleSize;
                     barrierOffset.x = self.extents.x * 2 * touchDir;
                 }
@@ -404,7 +387,6 @@
                 if (areBothUnderMe && isHoleBetween) {
                     let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
                     barrier.center.sub(barrierOffset);
-
                     collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
                     fill(0);
@@ -463,12 +445,6 @@
                 }
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime));
-                stroke(255, 255, 0);
-                line(this.center.x + Math.sign(movement.x) * this.extents.x, this.center.y + Math.sign(movement.y) * this.extents.y,
-                    this.center.x + movement.x * deltaTime,
-                    this.center.y + movement.y * deltaTime,)
-                ;
-                noStroke();
             }
 
 
@@ -519,24 +495,26 @@
         }
 
         update(deltaTime) {
-            this.controls();
+
+            this.controls(deltaTime);
             super.update(deltaTime);
         }
 
-        controls() {
-            this.vel.y += 600 * deltaTime / 1000;
+        controls(deltaTime) {
+            this.vel.x *= 0.97;
+            this.vel.y += 600 * deltaTime;
             let speed = 60;
             if (keyIsDown(16)) speed = 5;
             if (keyIsDown(81)) speed = 500;
             if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
             if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
-
+            stroke(0, 255, 0)
+            line(this.center.x, this.center.y, this.center.x + this.vel.x * deltaTime * 5, this.center.y + this.vel.y * deltaTime * 5);
             // Stop movement if no input is specified
             //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
-            this.vel.x *= 0.97;
 
             if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -60;
+                this.vel.y = -speed * .99;
             }
         }
     }
