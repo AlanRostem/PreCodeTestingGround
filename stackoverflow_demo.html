@@ -97,6 +97,7 @@
 
     // Bounding box class with a central position
     class AABB {
+        static EPSILON = 1e-13;
         constructor(center, extents) {
             this.center = center;
             this.extents = extents;
@@ -155,6 +156,10 @@
             this.side = side;
             this.distance = distance;
         }
+    }
+
+    function clamp(num, min, max) {
+        return num <= min ? min : num >= max ? max : num;
     }
 
     // Basic class for a controllable character that can move
@@ -251,7 +256,7 @@
                 || (entryTime.x < 0 && (this.right + velocity.x * maxEntryTime < aabb.left || this.left + velocity.x * maxEntryTime > aabb.right))
                 || (entryTime.y < 0 && (this.bottom + velocity.y * maxEntryTime < aabb.top || this.top + velocity.y * maxEntryTime > aabb.bottom))
             )) {
-                resultTime = maxEntryTime;
+                resultTime = clamp(maxEntryTime - AABB.EPSILON, 0, 1);
                 if (entryTime.x < entryTime.y) {
                     normal = createVector(Math.sign(deltaEntry.x), 0);
                     if (velocity.y > 0) side = "bottom";
@@ -270,11 +275,11 @@
                     let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
 
                     // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
-                    if (absVel.x < absVel.y) {
+                    if (absVel.x > absVel.y) {
                         normal = createVector(Math.sign(velocity.x), 0);
                         if (velocity.y > 0) side = "bottom";
                         else if (velocity.y < 0) side = "top";
-                    } else if (absVel.x > absVel.y) {
+                    } else if (absVel.x < absVel.y) {
                         normal = createVector(0, Math.sign(velocity.y));
                         if (velocity.x > 0) side = "right";
                         else if (velocity.x < 0) side = "left";
@@ -486,7 +491,7 @@
         constructor() {
             super(
                 createVector(width / 2, height / 2), // Place the player at the center of the screen
-                createVector(tileSize / 2 + 1, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
             );
         }
 
@@ -510,7 +515,7 @@
             //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
 
             if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -speed * .99;
+                this.vel.y = -speed;
             }
 
             this.vel.x *= 0.97;
