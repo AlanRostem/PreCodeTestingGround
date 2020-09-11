@@ -50,12 +50,12 @@
         const speed = 100;
         e0 = new Entity(
             createVector(64 * 2, 64),
-            createVector(tileSize, tileSize / 2)
+            createVector(tileSize - 1, tileSize / 2)
         );
 
         e1= new Entity(
             createVector(64 * 2.5 + 16, 64),
-            createVector(tileSize, tileSize / 2)
+            createVector(tileSize - 1, tileSize / 2)
         );
 
         entities.push(e0);
@@ -349,7 +349,7 @@
                 if (hit.normal.x !== 0) {
                     movementDir = Math.sign(hit.normal.x);
                     touchDir = Math.sign(potentialMovement.y);
-                    requiredSurfaceDist = self.extents.y * 2 * touchDir;
+                    requiredSurfaceDist = (standingOn.extents.y + self.extents.y) * touchDir;
                     areBothUnderMe =
                         (standingOn.center.y - self.center.y) === requiredSurfaceDist &&
                         (nextToHole.center.y - self.center.y) === requiredSurfaceDist;
@@ -362,7 +362,7 @@
                 if (hit.normal.y !== 0) {
                     movementDir = Math.sign(hit.normal.y);
                     touchDir = Math.sign(potentialMovement.x);
-                    requiredSurfaceDist = self.extents.x * 2 * touchDir;
+                    requiredSurfaceDist = (standingOn.extents.x + self.extents.x) * touchDir;
                     areBothUnderMe =
                         (standingOn.center.x - self.center.x) === requiredSurfaceDist &&
                         (nextToHole.center.x - self.center.x) === requiredSurfaceDist;
@@ -476,7 +476,7 @@
         constructor() {
             super(
                 createVector(width / 2, height / 2), // Place the player at the center of the screen
-                createVector(tileSize / 2, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
+                createVector(tileSize / 2 + 1, tileSize / 2) // Give it the same size as a tile (to demonstrate the main problem)
             );
         }
 
