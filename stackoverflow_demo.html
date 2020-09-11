@@ -377,6 +377,8 @@
                 let requiredSurfaceDist = self.extents.y * 2 * touchDir;
                 let areBothUnderMe = (standingOn.center.y - self.center.y) === requiredSurfaceDist &&
                     (nextToHole.center.y - self.center.y) === requiredSurfaceDist;
+                let requiredHoleSize = self.extents.x * 4 * movementDir;
+                let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
 
                 if (hit.normal.x !== 0) {
 
@@ -386,29 +388,24 @@
 
                 }
 
-                if (areBothUnderMe) {
-                    let requiredHoleSize = self.extents.x * 4 * movementDir;
-                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
+                if (areBothUnderMe && isHoleBetween) {
+                    let hole = new AABB(standingOn.center.copy(), self.extents.copy());
+                    hole.center.x += (standingOn.extents.x + self.extents.x) * movementDir;
 
-                    if (isHoleBetween) {
-                        let hole = new AABB(standingOn.center.copy(), self.extents.copy());
-                        hole.center.x += (standingOn.extents.x + self.extents.x) * movementDir;
+                    fill(255);
+                    rectMode(CENTER);
+                    rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
+                    rectMode(CORNER);
 
-                        fill(255);
-                        rectMode(CENTER);
-                        rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
-                        rectMode(CORNER);
+                    let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
+                    barrier.center.y -= self.extents.y * 2 * touchDir;
 
-                        let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
-                        barrier.center.y -= self.extents.y * 2 * touchDir;
+                    collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
-                        collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
-
-                        fill(0);
-                        rectMode(CENTER);
-                        rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
-                        rectMode(CORNER);
-                    }
+                    fill(0);
+                    rectMode(CENTER);
+                    rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
+                    rectMode(CORNER);
                 }
             }
         }
