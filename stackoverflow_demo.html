@@ -386,6 +386,7 @@
 
                 if (areBothUnderMe && isHoleBetween) {
                     let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
+                    barrier.isBarrier = true;
                     barrier.center.sub(barrierOffset);
                     collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
 
@@ -408,6 +409,10 @@
             if (hit) {
                 this.center.x += movement.x * hit.collisionTime * deltaTime;
                 this.center.y += movement.y * hit.collisionTime * deltaTime;
+
+                if (hit.aabb.isBarrier) {
+                    noLoop()
+                }
 
                 // Calculate the correct time of impact for the remaining
                 // collisions or to apply movement
@@ -501,14 +506,14 @@
         }
 
         controls(deltaTime) {
-            this.vel.x *= 0.97;
             this.vel.y += 600 * deltaTime;
+
             let speed = 60;
             if (keyIsDown(16)) speed = 5;
             if (keyIsDown(81)) speed = 500;
             if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
             if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
-            stroke(0, 255, 0)
+            stroke(0, 255, 0);
             line(this.center.x, this.center.y, this.center.x + this.vel.x * deltaTime * 5, this.center.y + this.vel.y * deltaTime * 5);
             // Stop movement if no input is specified
             //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
@@ -516,6 +521,8 @@
             if (keyIsDown(32)) { // Press space to fly
                 this.vel.y = -speed * .99;
             }
+
+            this.vel.x *= 0.97;
         }
     }
 
