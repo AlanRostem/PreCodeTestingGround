@@ -58,8 +58,14 @@
             createVector(tileSize, tileSize / 2)
         );
 
+        e2= new Entity(
+            createVector(8 * 16 + 8 + 0.1, 17 * 16 + 8),
+            createVector(tileSize/2, tileSize / 2)
+        );
+
         entities.push(e0);
         entities.push(e1);
+        entities.push(e2);
         entities.push(player);
 
         clear = console.clear;
@@ -332,7 +338,7 @@
             }
         }
 
-        fixEqualSizedHoleCollision(hit, potentialMovement, collisionStack, deltaTime) {
+        fixEqualSizedHoleCollision(hit, potentialMovement, time, collisionStack, deltaTime) {
             if (collisionStack.length > 0) {
                 let self = this;
                 let standingOn = hit.aabb;
@@ -375,8 +381,12 @@
                 if (areBothUnderMe && isHoleBetween) {
                     let barrier = new AABB(nextToHole.center.copy(), self.extents.copy());
                     barrier.center.sub(barrierOffset);
-                    collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
-
+                    let d = this.calculateSweepData(barrier, hit.normal, deltaTime);
+                    /*collisionStack.push(*/this.calculateSweepData(barrier, hit.normal, deltaTime);/*)*/
+                    //this.resolveCollisionOrMove(deltaTime, hit.normal, time, [this.calculateSweepData(barrier, hit.normal, deltaTime)]);
+                    this.center.x = barrier.center.x + (barrier.extents.x + this.extents.x) * (-movementDir);
+                    hit.normal.x = 0;
+                    hit.normal.y = Math.sign(potentialMovement.y);
                     fill(0);
                     rectMode(CENTER);
                     rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
@@ -413,7 +423,7 @@
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-                    this.fixEqualSizedHoleCollision(hit, potential, collisionStack, deltaTime);
+                    this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack, deltaTime);
 
                     stroke(255, 0, 0);
                     noFill();
