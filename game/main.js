@@ -39,3 +39,5 @@ window.draw = () => {
     world.draw();
     world.update(deltaTime / 1000);
 };
+
+

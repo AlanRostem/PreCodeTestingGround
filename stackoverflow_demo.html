@@ -24,7 +24,7 @@
             // to edit this to structure your own testing ground. 0 is
             // empty space and 1 or above is a solid tile.
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -47,18 +47,19 @@
         entities = [];
         player = new Player();
 
-        const speed = 100;
         e0 = new Entity(
-            createVector(64 * 2 + 16 - 8, 64),
-            createVector(tileSize / 2, tileSize / 2)
+            createVector(64 * 2, 64),
+            createVector(tileSize, tileSize / 2)
         );
 
-        // e0.vel.y = 200;
+        e1 = new Entity(
+            createVector(64 * 2.5 + 16, 64),
+            createVector(tileSize, tileSize / 2)
+        );
 
         entities.push(e0);
+        entities.push(e1);
         entities.push(player);
-
-        clear = console.clear;
     }
 
     function draw() {
@@ -147,34 +148,9 @@
         }
     }
 
-    class Matrix {
-        constructor(a00, a01, a10, a11) {
-            this.data = [...arguments];
-        }
-
-        get(x, y) {
-            return this.data[x + 2 * y];
-        }
-
-        mult(v) {
-            let vec = v.copy();
-            const x = vec.x;
-            vec.x = vec.x * this.get(0, 0) + this.get(1, 0) * vec.y;
-            vec.y = x * this.get(0, 1) + this.get(1, 1) * vec.y;
-            return vec;
-        }
-    }
-
-    // Basic class for a controllable character that can move
-    // and collide with the environment. All collision resolution
+    // All collision resolution
     // logic for this demo will occur here.
     class Entity extends AABB {
-        side = {
-            "left": false,
-            "right": false,
-            "top": false,
-            "bottom": false,
-        };
         vel = createVector(0, 0); // Velocity component (starts at zero)
         collisionStack = []; // Array containing all possible collisions ready to be resolved in the correct order
 
@@ -269,20 +245,16 @@
                     if (velocity.x > 0) side = "right";
                     else if (velocity.x < 0) side = "left";
                 } else {
-                    fill(0, 255, 255);
-                    rectMode(CENTER);
-                    rect(aabb.center.x, aabb.center.y, aabb.extents.x * 2, aabb.extents.y * 2);
-                    rectMode(CORNER);
                     // Both axes now have equal intersection depth (direct and perfect corner collision).
                     // We need to use the velocity to determine the correct collision normal
                     let absVel = createVector(Math.abs(velocity.x), Math.abs(velocity.y));
 
                     // If the x-velocity is stronger than the y-velocity, perform a y-collision like we did previously and vice-versa
-                    if (absVel.x < absVel.y) {
+                    if (absVel.x >= absVel.y) {
                         normal = createVector(Math.sign(velocity.x), 0);
                         if (velocity.y > 0) side = "bottom";
                         else if (velocity.y < 0) side = "top";
-                    } else if (absVel.x > absVel.y) {
+                    } else {
                         normal = createVector(0, Math.sign(velocity.y));
                         if (velocity.x > 0) side = "right";
                         else if (velocity.x < 0) side = "left";
@@ -340,71 +312,80 @@
         entityBroadPhase(deltaTime) {
             for (let e of entities) {
                 if (this.createMovementBoundary(deltaTime).overlaps(e) && this !== e) {
-                    let speep = this.calculateSweepData(e, this.vel, deltaTime);
-                    this.collisionStack.push(speep);
+                    this.collisionStack.push(this.calculateSweepData(e, this.vel, deltaTime));
                 }
             }
         }
 
-        static MATRICES = [
-            new Matrix(
-                1, 0,
-                0, 1,
-            ),
-            new Matrix(
-                0, 1,
-                -1, 0)
-            ,
-            new Matrix(
-                -1, 0,
-                0, -1,
-            ),
-            new Matrix(
-                0, -1,
-                1, 0,
-            ),
-        ];
-
-        fixEqualSizedHoleCollision(hit, collisionStack, deltaTime) {
+        fixEqualSizedHoleCollision(hit, potentialMovement, time, collisionStack) {
             if (collisionStack.length > 0) {
-                let index;
+                // The tile/entity the player currently stands on
+                let standingOn = hit.aabb;
 
-                if (hit.normal.y > 0) index = 0; // Bottom
-                if (hit.normal.x > 0) index = 1; // Right
-                if (hit.normal.y < 0) index = 2; // Top
-                if (hit.normal.x < 0) index = 3; // Left
+                // The tile/entity assumed to be next to the player-sized hole
+                let nextToHole = collisionStack[0].aabb;
 
-                let direction = Math.sign(hit.normal.x);
+                // Signed integer expressing the player's movement direction
+                let movementDir;
 
-                let standingOn = hit.aabb.copy();
-                let nextToHole = collisionStack[0].aabb.copy(); // TODO: Find out if this detects the wrong one
+                // Signed integer expressing what direction the points to the surface the player touches
+                let touchDir;
 
-                let requiredYDist = this.extents.y * 2;
-                let areBothUnderMe = (standingOn.center.y - this.center.y) === requiredYDist &&
-                    (nextToHole.center.y - this.center.y) === requiredYDist;
+                // Distance from the player and the surface he's standing on used to determine if it's walked on
+                let requiredSurfaceDist;
 
-                if (areBothUnderMe) {
-                    let requiredXDist = this.extents.x * 4 * direction;
-                    let isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredXDist;
+                // Boolean control variables that speak for themselves. They're not really needed,
+                // but make the code understandable.
+                let areBothUnderMe;
+                let isHoleBetween;
 
-                    if (isHoleBetween) {
-                        let hole = new AABB(standingOn.center.copy(), this.extents.copy());
-                        hole.center.x += (standingOn.extents.x + this.extents.x) * direction;
+                // Distance between each entity expected to form the player's size
+                let requiredHoleSize;
 
-                        fill(255);
-                        rectMode(CENTER);
-                        rect(hole.center.x, hole.center.y, hole.extents.x * 2, hole.extents.y * 2);
-                        rectMode(CORNER);
+                // Offset vector to displace a hypothetical "barrier" that blocks the player in order
+                // make it fall into the hole smoothly.
+                let barrierOffset = createVector(0, 0);
 
+                // Compute the above variables to detect and resolve the hole problem.
+                // The next else-if statement is essentially the same as this if-statement only
+                // that it works for sliding along walls.
+                if (hit.normal.x !== 0) {
+                    movementDir = Math.sign(hit.normal.x);
+                    touchDir = Math.sign(potentialMovement.y);
+                    requiredSurfaceDist = (standingOn.extents.y + this.extents.y) * touchDir;
+                    areBothUnderMe =
+                        (standingOn.center.y - this.center.y) === requiredSurfaceDist &&
+                        (nextToHole.center.y - this.center.y) === requiredSurfaceDist;
+                    requiredHoleSize = (this.extents.x * 2 + standingOn.extents.x + nextToHole.extents.x) * movementDir;
+                    isHoleBetween = (nextToHole.center.x - standingOn.center.x) === requiredHoleSize;
+                    barrierOffset.y = this.extents.y * 2 * touchDir;
+                    barrierOffset.x = (this.extents.x - nextToHole.extents.x) * -movementDir;
+                    if (areBothUnderMe && isHoleBetween) {
+                        // Create a simulated barrier that will block the player and make him fall
+                        // into the hole.
                         let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
-                        barrier.center.y -= this.extents.y * 2;
-
-                        collisionStack.push(this.calculateSweepData(barrier, hit.normal, deltaTime));
-
-                        fill(0);
-                        rectMode(CENTER);
-                        rect(barrier.center.x, barrier.center.y, barrier.extents.x * 2, barrier.extents.y * 2);
-                        rectMode(CORNER);
+                        barrier.center.sub(barrierOffset);
+                        this.center.x = barrier.center.x + (barrier.extents.x + this.extents.x) * (-movementDir);
+                        hit.normal.x = 0; // The player should now fall into the hole and no longer walk
+                        hit.normal.y = potentialMovement.y; // The sliding should now be applied to the hole wall
+                    }
+                } else if (hit.normal.y !== 0) {
+                    movementDir = Math.sign(hit.normal.y);
+                    touchDir = Math.sign(potentialMovement.x);
+                    requiredSurfaceDist = (standingOn.extents.x + this.extents.x) * touchDir;
+                    areBothUnderMe =
+                        (standingOn.center.x - this.center.x) === requiredSurfaceDist &&
+                        (nextToHole.center.x - this.center.x) === requiredSurfaceDist;
+                    requiredHoleSize = (this.extents.y * 2 + standingOn.extents.y + nextToHole.extents.y) * movementDir;
+                    isHoleBetween = (nextToHole.center.y - standingOn.center.y) === requiredHoleSize;
+                    barrierOffset.x = this.extents.x * 2 * touchDir;
+                    barrierOffset.y = (this.extents.y - nextToHole.extents.y) * -movementDir;
+                    if (areBothUnderMe && isHoleBetween) {
+                        let barrier = new AABB(nextToHole.center.copy(), this.extents.copy());
+                        barrier.center.sub(barrierOffset);
+                        this.center.y = barrier.center.y + (barrier.extents.y + this.extents.y) * (-movementDir);
+                        hit.normal.y = 0;
+                        hit.normal.x = potentialMovement.x;
                     }
                 }
             }
@@ -430,6 +411,9 @@
                 let dotProduct = p5.Vector.dot(movement, hit.normal) * time;
                 hit.normal.mult(dotProduct);
 
+                // Save the previous movement vector (it will get modified in onCollision)
+                let potential = movement.copy().mult(deltaTime);
+
                 // Handle events after each respective side that collided
                 this.onCollision(hit.side);
                 if (time > 0) {
@@ -437,13 +421,9 @@
                     // If the time of impact happened to be above zero, then recalculate
                     // collision for all other potential collisions with respect to the normal vector
                     let stack = [];
-                    this.fixEqualSizedHoleCollision(hit, collisionStack, deltaTime);
 
-                    stroke(255, 0, 0);
-                    noFill();
-                    rectMode(CENTER);
-                    //rect(boundary.center.x, boundary.center.y, boundary.extents.x * 2, boundary.extents.y * 2);
-                    rectMode(CORNER);
+                    // The magic function which solves all of this nonsense :)
+                    this.fixEqualSizedHoleCollision(hit, potential, time, collisionStack);
                     for (let sweep of collisionStack) {
                         // Pass the normal vector as the movement vector for the next possible collision
                         if (boundary.overlaps(sweep.aabb)) {
@@ -457,24 +437,14 @@
                 }
             } else {
                 this.center.add(p5.Vector.mult(movement, deltaTime));
-                stroke(255, 255, 0);
-                line(this.center.x + Math.sign(movement.x) * this.extents.x, this.center.y + Math.sign(movement.y) * this.extents.y,
-                    this.center.x + movement.x * deltaTime,
-                    this.center.y + movement.y * deltaTime,)
-                ;
-                noStroke();
             }
-
-
         }
 
         onCollision(side) {
-            this.side[side] = true;
             switch (side) {
                 case "top":
                 case "bottom":
                     this.vel.y = 0;
-                    this.jumping = false;
                     break;
                 case "left":
                 case "right":
@@ -484,12 +454,6 @@
         }
 
         update(deltaTime) {
-            this.side = {
-                "left": false,
-                "right": false,
-                "top": false,
-                "bottom": false,
-            };
             this.entityBroadPhase(deltaTime);
             this.tileMapBroadPhase(deltaTime);
             this.resolveCollisionOrMove(deltaTime);
@@ -513,25 +477,25 @@
         }
 
         update(deltaTime) {
-            this.controls();
+
+            this.controls(deltaTime);
             super.update(deltaTime);
         }
 
-        controls() {
-            this.vel.y += 600 * deltaTime / 1000;
+        controls(deltaTime) {
+            this.vel.y += 600 * deltaTime;
+
             let speed = 60;
-            if (keyIsDown(16)) speed = 5;
-            if (keyIsDown(81)) speed = 500;
-            if (keyIsDown(65)) this.vel.x = -speed; // Press A to walk left
-            if (keyIsDown(68)) this.vel.x = speed; // Press D to walk left
-
-            // Stop movement if no input is specified
-            //if (!keyIsDown(65) && !keyIsDown(68)) this.vel.x = 0;
-            this.vel.x *= 0.97;
-
+            if (keyIsDown(16)) speed = 5; // Press Shift to move extremely slow...
+            if (keyIsDown(81)) speed = 500; // Press Q to move extremely fast!
+            if (keyIsDown(65)) this.vel.x = -speed; // Press A to move left
+            if (keyIsDown(68)) this.vel.x = speed; // Press D to move left
             if (keyIsDown(32)) { // Press space to fly
-                this.vel.y = -60;
+                this.vel.y = -speed;
             }
+
+            // Apply friction to the player when he's not walking (this is just here as a test)
+            this.vel.x *= 0.97;
         }
     }
 
