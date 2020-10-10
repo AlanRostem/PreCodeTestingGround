@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pixel perfect slipping</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
+</head>
+<body>
+<script>
+    let player;
+    let vel;
+    let speed;
+    const size = 120;
+    function setup() {
+        player = createVector(size, size)
+        vel = createVector(0, 0)
+        speed = 30;
+        createCanvas(640, 640)
+
+    }
+
+    function draw() {
+        if (keyIsDown(37)) vel.x = -speed;
+        if (keyIsDown(39)) vel.x = speed;
+        player.x += vel.x;
+        vel.x -= Math.sign(vel.x);
+        background(0);
+        scale(1/5, 1/5)
+        fill(255)
+        rect(player.x, player.y, size, size);
+    }
+</script>
+</body>
+</html>

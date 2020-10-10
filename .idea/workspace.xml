@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="" />
+    <list default="true" id="af52da07-508a-4622-9447-0e1b2508cdcb" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/DameGevGoals.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pixel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dritt.html" beforeDir="false" afterPath="$PROJECT_DIR$/dritt.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -102,6 +107,12 @@
       <workItem from="1599588328510" duration="4983000" />
       <workItem from="1599640680132" duration="19063000" />
       <workItem from="1599729295598" duration="18229000" />
+      <workItem from="1599768736013" duration="3302000" />
+      <workItem from="1600375949791" duration="2284000" />
+      <workItem from="1600521148414" duration="713000" />
+      <workItem from="1600643252504" duration="1003000" />
+      <workItem from="1601742502911" duration="519000" />
+      <workItem from="1602339417070" duration="8121000" />
     </task>
     <servers />
   </component>
@@ -136,9 +147,9 @@
     </option>
   </component>
   <component name="WindowStateProjectService">
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1599483626554">
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1602345413640">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1599483626554" />
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1602345413640" />
   </component>
 </project>
